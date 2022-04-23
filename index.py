@@ -9,18 +9,32 @@ import file_io
 
 # OPTIMIZE LATER - limit the number of for loops (we loop through all of the pages a couple of times - try to combine)!!!
 
-"""Questions: 
-3. how to check if more or less than 4 args?
-"""
-
 
 class Indexer:
 
-    def __init__(self, xml_path: str, title_path: str, docs_path: str, words_path: str):
-        self.xml_path = xml_path
-        self.title_path = title_path
-        self.docs_path = docs_path
-        self.words_path = words_path
+    # when I do "py index.py test_tf_idf.xml titles.txt docs.txt words.txt"
+    # nothing happens. I made the txt files but I have not figured out how 
+    # to write things to them
+
+    # I see that you made a test tf idf xml, did you find a way to test them?
+    # I'm kind of confused cause to test them you need to instantiate Indexer
+    # But when you do, those methods are already called....
+    # Do you know how I would be able to just call each method individually to test
+    # I shall go to ta hours and ask
+
+    # I believe the inputs the user inputs is automatically converted to a list
+    # I will try to confirm it out tmr
+    # ahh sry I hate that I procrastinated and wasn't able to get the tests done tonight
+
+    def __init__(self, argv: list): 
+
+        if(len(argv)-1 == 4): # cause the name of the script (e.g. "index.py")... can usually ignore
+            raise ValueError("not enough inputs")
+        
+        self.xml_path = argv[1] 
+        self.title_path = argv[2]
+        self.docs_path = argv[3]
+        self.words_path = argv[4]
 
         self.word_corpus = set()
         self.relevance_dict = {}
@@ -35,11 +49,9 @@ class Indexer:
         self.title_dict = {}
 
         self.parser()
+        self.write_files()
 
-    def indexer(self):
-        if (len(sys.argv) != 4):  # fix!!! - ask about this
-            raise ValueError("invalid number of arguments")
-
+    def write_files(self):
         file_io.write_title_file(
             self.title_path, self.title_dict)
         file_io.write_words_file(self.words_path, self.relevance_dict)
