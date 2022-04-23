@@ -7,7 +7,11 @@ from nltk.stem import PorterStemmer
 import math
 import file_io
 
-# OPTIMIZE LATER
+# OPTIMIZE LATER - limit the number of for loops (we loop through all of the pages a couple of times - try to combine)!!!
+
+"""Questions: 
+3. how to check if more or less than 4 args?
+"""
 
 
 class Indexer:
@@ -27,39 +31,52 @@ class Indexer:
         self.previous = {}  # id --> rank r
         self.current = {}  # id --> rank r'
 
+        self.links_dict = {}
+        self.title_dict = {}
+
         self.parser()
 
     def indexer(self):
-        if (len(sys.argv) != 4):
+        if (len(sys.argv) != 4):  # fix!!! - ask about this
             raise ValueError("invalid number of arguments")
 
-        # dict from page titles to page ids
-        title_dict = {}
-        for page in self.all_pages:
-            title_dict[page.find('title').text] = int(page.find('id').text)
-
-        # dict from ids to page rank
-
         file_io.write_title_file(
-            self.title_path, title_dict)  # put in dicts here
+            self.title_path, self.title_dict)
         file_io.write_words_file(self.words_path, self.relevance_dict)
         file_io.write_document_file(self.docs_path, self.current)
 
     def parser(self):
-        # remove some of these to make space?
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
         make_stems = PorterStemmer()
+        link_regex = '''\[\[[^\[]+?\]\]'''
 
-        for page in self.all_pages:  # faster way to do this?
+        for page in self.all_pages:
+            print(page.find('title').text)
             all_text = re.findall(n_regex, page.find('text').text)
+            self.title_dict[page.find('title').text.strip()] = int(
+                page.find('id').text)
             for word in all_text:
+                word.strip("[[ ]]")
+                if "|" in word:
+                    self.word_corpus.union(re.findall(
+                        n_regex, word[word.find("|")+1:]))
                 if word not in stop_words:
-                    self.word_corpus.add(make_stems.stem(word))
+                    self.word_corpus.add(make_stems.stem(word.lower()))
+
+        for page in self.all_pages:
+            self.links_dict[int(page.find('id').text)] = set()
+            all_links = re.findall(link_regex, page.find('text').text)
+            for link in all_links:
+                stripped_link = link.strip("[[ ]]")
+                if "|" in stripped_link:
+                    self.links_dict[int(page.find('id').text)].add(
+                        self.title_dict[stripped_link.partition("|")[0]])
+                else:
+                    self.links_dict[int(page.find('id').text)].add(
+                        self.title_dict[stripped_link])
 
     def determine_tf(self):
-        # have many dicts for now and optimize later
-
         count_dict = {}  # word --> (id --> count)
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         make_stems = PorterStemmer()
@@ -76,7 +93,7 @@ class Indexer:
                     count_dict[make_stems.stem(word)][int(
                         page.find('id').text)] += 1
 
-        max_list = {}  # make array if possible? dict ok?
+        max_list = {}
         for key in count_dict:
             for id in count_dict[key]:
                 max_list[id] = 0
@@ -121,8 +138,8 @@ class Indexer:
         idf_dict = self.determine_idf()
         for key in idf_dict:
             for page in self.all_pages:
-                self.relevance_dict[(key, int(page.find('id').text))] = self.relevance_dict[(
-                    key, int(page.find('id').text))] * idf_dict[key]
+                self.relevance_dict[key][int(page.find('id').text)] = self.relevance_dict[
+                    key][int(page.find('id').text)] * idf_dict[key]
 
     def page_rank(self):
 
@@ -132,34 +149,32 @@ class Indexer:
         for page in self.all_pages:
             self.current[int(page.find('id').text)] = 1/len(self.all_pages)
 
-        while self.compute_dist(self.previous, self.current) > .001:
+        while self.compute_dist(self.current, self.previous) > .001:
             self.previous = self.current.copy()
             for j in self.all_pages:
-                self.current[j] = 0
+                self.current[int(j.find('id').text)] = 0
                 for k in self.all_pages:
-                    self.current[j] += self.compute_weights[(
-                        k, j)] * self.previous[k]
+                    self.current[int(j.find('id').text)] += self.compute_weights(
+                        k, j) * self.previous[int(k.find('id').text)]
 
-    def compute_weights(self):
-        # dict from (id, id) tuple --> weight
-        weight_dict = {}
-        for page1 in self.all_pages:
-            for page2 in self.all_pages:
-                weight_dict[(int(page1.find('id').text),
-                             int(page2.find('id').text))] = 0
+    def compute_weights(self, page1: str, page2: str):
 
-        # pseudocode:
-        # if (page links to itself or to a page outside corpus):
-        # do nothing (doesn't need to be a line but keep in mind)
-        # elif (k has links to nothing)
-        # e/n + (1 - e)(1/n-1)
-        # elif (k links to j one or more times):
-        # e/n + (1 - e)(1/unique number of links out of k)
-        # elif (k does not link to j)
-        # e/n
-        pass
+        if int(page1.find('id').text) == int(page2.find('id').text):
+            print("first case", page1, page2)
+            return 0.15/len(self.all_pages)
+        elif len(self.links_dict[int(page1.find('id').text)]) == 0:
+            print("second")
+            return 0.15/len(self.all_pages) + (1 - 0.15)*(1/(len(self.all_pages) - 1))
+        elif int(page2.find('id').text) in self.links_dict[int(page1.find('id').text)]:
+            return 0.15/len(self.all_pages) + (1 - 0.15)*(1/len(self.links_dict[int(page1.find('id').text)]))
+        elif int(page2.find('id').text) not in self.links_dict[int(page1.find('id').text)]:
+            return 0.15/len(self.all_pages)
 
     def compute_dist(self, previous: dict, current: dict):
-        prev = previous.values
-        curr = current.values
-        math.dist(curr - prev)
+        prev = []
+        curr = []
+        for key in previous:
+            prev.append(previous[key])
+        for key in current:
+            curr.append(current[key])
+        return math.dist(curr, prev)
