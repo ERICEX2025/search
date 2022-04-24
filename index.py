@@ -9,22 +9,7 @@ import file_io
 
 # OPTIMIZE LATER - limit the number of for loops (we loop through all of the pages a couple of times - try to combine)!!!
 
-
 class Indexer:
-
-    # when I do "py index.py test_tf_idf.xml titles.txt docs.txt words.txt"
-    # nothing happens. I made the txt files but I have not figured out how
-    # to write things to them
-
-    # I see that you made a test tf idf xml, did you find a way to test them?
-    # I'm kind of confused cause to test them you need to instantiate Indexer
-    # But when you do, those methods are already called....
-    # Do you know how I would be able to just call each method individually to test
-    # I shall go to ta hours and ask
-
-    # I believe the inputs the user inputs is automatically converted to a list
-    # I will try to confirm it out tmr
-    # ahh sry I hate that I procrastinated and wasn't able to get the tests done tonight
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
         self.xml_path = xml
@@ -37,6 +22,7 @@ class Indexer:
 
         self.root = et.parse(self.xml_path).getroot()
         self.all_pages = self.root.findall("page")
+        # Why don't we import all the words into the corpus here and pass it into parser
 
         self.previous = {}  # id --> rank r
         self.current = {}  # id --> rank r'
@@ -47,12 +33,7 @@ class Indexer:
         self.parser()
         self.write_files()
 
-    def write_files(self):
-        file_io.write_title_file(
-            self.title_path, self.title_dict)
-        file_io.write_words_file(self.words_path, self.relevance_dict)
-        file_io.write_document_file(self.docs_path, self.current)
-
+    #I think we should have helper methods to split this up
     def parser(self):
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
@@ -60,13 +41,18 @@ class Indexer:
         link_regex = '''\[\[[^\[]+?\]\]'''
 
         for page in self.all_pages:
-            print(page.find('title').text)
-            all_text = re.findall(n_regex, page.find('text').text)
-            self.title_dict[int(page.find('id').text)] = page.find('title').text.strip()
+            print(page.find('title').text) # is this for testing, (talking to myself) if so can get rid of
+            all_text = re.findall(n_regex, page.find('text').text) 
+
+            #loops through each page and adds page id and title to the title dic
+            self.title_dict[int(page.find('id').text)] = page.find('title').text.strip() 
+
             for word in all_text:
-                word.strip("[[ ]]")
+                word.strip("[[ ]]") # what happens if the word doesn't have [[]] aka not a link
                 if "|" in word:
-                    self.word_corpus.union(re.findall(
+                    # why union? and not just add. 
+                    # we need to keep track of the title as what the page links to, add it to the dictionary? somehow
+                    self.word_corpus.union(re.findall( 
                         n_regex, word[word.find("|")+1:]))
                 if word not in stop_words:
                     self.word_corpus.add(make_stems.stem(word.lower()))
@@ -148,6 +134,17 @@ class Indexer:
                 self.relevance_dict[key][int(page.find('id').text)] = self.relevance_dict[
                     key][int(page.find('id').text)] * idf_dict[key]
 
+
+
+
+
+
+
+
+
+
+
+
     def page_rank(self):
 
         for page in self.all_pages:
@@ -186,9 +183,14 @@ class Indexer:
             curr.append(current[key])
         return math.dist(curr, prev)
 
+    def write_files(self):
+        file_io.write_title_file(
+            self.title_path, self.title_dict)
+        file_io.write_words_file(self.words_path, self.relevance_dict)
+        file_io.write_document_file(self.docs_path, self.current)
 
 if __name__ == "__main__":
-    if(len(sys.argv)-1 != 4):  # cause the name of the script (e.g. "index.py")... can usually ignore - think should be not!
-        print("wrong number of arguments!")
+    if(len(sys.argv)-1 != 4):  # -1 cause the name of the script (e.g. "index.py")... can usually ignore
+        print("Wrong number of arguments!!!")
     else:
         Indexer(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
