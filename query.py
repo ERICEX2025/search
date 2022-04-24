@@ -19,12 +19,14 @@ class Querier:
 
         self.query = []  # figure out how to populate this
 
-    def querier(self):
+        # need to parse input in main - how and where
+
+        # if no results, print a message
+
+    def read_files(self):
 
         file_io.read_title_file(self.title_path, self.title_dict)
-
         file_io.read_docs_file(self.docs_path, self.docs_dict)
-
         file_io.read_words_file(self.words_path, self.words_dict)
 
     def relevance_score(self):
@@ -35,7 +37,19 @@ class Querier:
                 tot_sum[int(page.find('id').text)
                         ] += self.words_dict[word][int(page.find('id').text)]
 
-        return tot_sum
+        sorted(tot_sum.values(), reverse=True)
+        sorted_dict = {}
+
+        for i in sorted(tot_sum.values(), reverse=True):
+            for k in tot_sum.keys():
+                if tot_sum[k] == i:
+                    sorted_dict[k] = tot_sum[k]
+
+        title_list = []
+        for id in list(sorted_dict.keys())[:10]:
+            title_list.append(self.title_dict[id])
+
+        return title_list
 
     def page_rank_score(self):
         tot_sum = {}  # from id to sum value
@@ -45,11 +59,23 @@ class Querier:
                 tot_sum[int(page.find('id').text)] += (self.words_dict[word]
                                                        [int(page.find('id').text)] * self.docs_dict[int(page.find('id').text)])
 
-        return tot_sum
+        sorted(tot_sum.values(), reverse=True)
+        sorted_dict = {}
+
+        for i in sorted(tot_sum.values(), reverse=True):
+            for k in tot_sum.keys():
+                if tot_sum[k] == i:
+                    sorted_dict[k] = tot_sum[k]
+
+        title_list = []
+        for id in list(sorted_dict.keys())[:10]:
+            title_list.append(self.title_dict[id])
+
+        return title_list
 
 
 # main method should support the following:
-# python3 query.py [--pagerank] <titleIndex> <documentIndex> <wordIndex>
+# python3 query.py[--pagerank] < titleIndex > <documentIndex > <wordIndex >
 if __name__ == "__main__":
     while True:
         query = input("What would you like to search:")
@@ -57,12 +83,10 @@ if __name__ == "__main__":
             break
         if (len(sys.argv) == 5):
             # include page rank - call helper
-            pass
+            Querier(sys.argv[2], sys.argv[3], sys.argv[4]).page_rank_score()
         elif (len(sys.argv) == 4):
             # no page rank - call helper
-            pass
+            Querier(sys.argv[1], sys.argv[2], sys.argv[3]).relevance_score()
         else:
             raise ValueError("invalid number of args")
-
-        # return the document titles in order of priority (might need a line to print 1-10 in front of doc name)
     exit

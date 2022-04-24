@@ -13,7 +13,7 @@ import file_io
 class Indexer:
 
     # when I do "py index.py test_tf_idf.xml titles.txt docs.txt words.txt"
-    # nothing happens. I made the txt files but I have not figured out how 
+    # nothing happens. I made the txt files but I have not figured out how
     # to write things to them
 
     # I see that you made a test tf idf xml, did you find a way to test them?
@@ -26,7 +26,7 @@ class Indexer:
     # I will try to confirm it out tmr
     # ahh sry I hate that I procrastinated and wasn't able to get the tests done tonight
 
-    def __init__(self, xml: str, title: str, doc: str, word: str): 
+    def __init__(self, xml: str, title: str, doc: str, word: str):
         self.xml_path = xml
         self.title_path = title
         self.docs_path = doc
@@ -62,8 +62,7 @@ class Indexer:
         for page in self.all_pages:
             print(page.find('title').text)
             all_text = re.findall(n_regex, page.find('text').text)
-            self.title_dict[page.find('title').text.strip()] = int(
-                page.find('id').text)
+            self.title_dict[int(page.find('id').text)] = page.find('title').text.strip()
             for word in all_text:
                 word.strip("[[ ]]")
                 if "|" in word:
@@ -79,10 +78,10 @@ class Indexer:
                 stripped_link = link.strip("[[ ]]")
                 if "|" in stripped_link:
                     self.links_dict[int(page.find('id').text)].add(
-                        self.title_dict[stripped_link.partition("|")[0]])
+                        self.title_dict[stripped_link.partition("|")[0]]) #ask about and fix!!
                 else:
                     self.links_dict[int(page.find('id').text)].add(
-                        self.title_dict[stripped_link])
+                        self.title_dict[stripped_link]) #ask about and fix!!
 
     def determine_tf(self):
         count_dict = {}  # word --> (id --> count)
@@ -189,7 +188,7 @@ class Indexer:
 
 
 if __name__ == "__main__":
-    if(len(sys.argv)-1 == 4): # cause the name of the script (e.g. "index.py")... can usually ignore
+    if(len(sys.argv)-1 != 4):  # cause the name of the script (e.g. "index.py")... can usually ignore - think should be not!
         print("wrong number of arguments!")
     else:
         Indexer(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
