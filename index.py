@@ -26,15 +26,11 @@ class Indexer:
     # I will try to confirm it out tmr
     # ahh sry I hate that I procrastinated and wasn't able to get the tests done tonight
 
-    def __init__(self, argv: list): 
-
-        if(len(argv)-1 == 4): # cause the name of the script (e.g. "index.py")... can usually ignore
-            raise ValueError("not enough inputs")
-        
-        self.xml_path = argv[1] 
-        self.title_path = argv[2]
-        self.docs_path = argv[3]
-        self.words_path = argv[4]
+    def __init__(self, xml: str, title: str, doc: str, word: str): 
+        self.xml_path = xml
+        self.title_path = title
+        self.docs_path = doc
+        self.words_path = word
 
         self.word_corpus = set()
         self.relevance_dict = {}
@@ -190,3 +186,10 @@ class Indexer:
         for key in current:
             curr.append(current[key])
         return math.dist(curr, prev)
+
+
+if __name__ == "__main__":
+    if(len(sys.argv)-1 == 4): # cause the name of the script (e.g. "index.py")... can usually ignore
+        print("wrong number of arguments!")
+    else:
+        Indexer(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
