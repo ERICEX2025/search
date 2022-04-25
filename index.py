@@ -9,6 +9,7 @@ import file_io
 
 # OPTIMIZE LATER - limit the number of for loops (we loop through all of the pages a couple of times - try to combine)!!!
 
+
 class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
@@ -30,10 +31,12 @@ class Indexer:
         self.links_dict = {}
         self.title_dict = {}
 
+        self.title_to_id = {}
+
         self.parser()
         self.write_files()
 
-    #I think we should have helper methods to split this up
+    # I think we should have helper methods to split this up
     def parser(self):
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
@@ -41,19 +44,26 @@ class Indexer:
         link_regex = '''\[\[[^\[]+?\]\]'''
 
         for page in self.all_pages:
-            print(page.find('title').text) # is this for testing, (talking to myself) if so can get rid of
-            all_text = re.findall(n_regex, page.find('text').text) 
+            # is this for testing, (talking to myself) if so can get rid of
+            all_text = re.findall(n_regex, page.find('text').text)
+            all_titles = re.findall(n_regex, page.find('title').text)
+            all_text.extend(all_titles)
 
-            #loops through each page and adds page id and title to the title dic
-            self.title_dict[int(page.find('id').text)] = page.find('title').text.strip() 
+            # loops through each page and adds page id and title to the title dic
+            self.title_dict[int(page.find('id').text)] = page.find(
+                'title').text.strip()
+
+            self.title_to_id[page.find('title').text] = int(
+                page.find('id').text)
 
             for word in all_text:
-                word.strip("[[ ]]") # what happens if the word doesn't have [[]] aka not a link
+                # what happens if the word doesn't have [[]] aka not a link
+                word.strip("[[ ]]")
                 if "|" in word:
-                    # why union? and not just add. 
+                    # why union? and not just add.
                     # we need to keep track of the title as what the page links to, add it to the dictionary? somehow
-                    self.word_corpus.union(re.findall( 
-                        n_regex, word[word.find("|")+1:]))
+                    self.word_corpus.union(re.findall(
+                        n_regex, word[word.find("|")+1:]))  # look at
                 if word not in stop_words:
                     self.word_corpus.add(make_stems.stem(word.lower()))
 
@@ -64,10 +74,10 @@ class Indexer:
                 stripped_link = link.strip("[[ ]]")
                 if "|" in stripped_link:
                     self.links_dict[int(page.find('id').text)].add(
-                        self.title_dict[stripped_link.partition("|")[0]]) #ask about and fix!!
+                        self.title_to_id[stripped_link.partition("|")[0]])
                 else:
                     self.links_dict[int(page.find('id').text)].add(
-                        self.title_dict[stripped_link]) #ask about and fix!!
+                        self.title_to_id[stripped_link])
 
     def determine_tf(self):
         count_dict = {}  # word --> (id --> count)
@@ -134,17 +144,6 @@ class Indexer:
                 self.relevance_dict[key][int(page.find('id').text)] = self.relevance_dict[
                     key][int(page.find('id').text)] * idf_dict[key]
 
-
-
-
-
-
-
-
-
-
-
-
     def page_rank(self):
 
         for page in self.all_pages:
@@ -164,10 +163,8 @@ class Indexer:
     def compute_weights(self, page1: str, page2: str):
 
         if int(page1.find('id').text) == int(page2.find('id').text):
-            print("first case", page1, page2)
             return 0.15/len(self.all_pages)
         elif len(self.links_dict[int(page1.find('id').text)]) == 0:
-            print("second")
             return 0.15/len(self.all_pages) + (1 - 0.15)*(1/(len(self.all_pages) - 1))
         elif int(page2.find('id').text) in self.links_dict[int(page1.find('id').text)]:
             return 0.15/len(self.all_pages) + (1 - 0.15)*(1/len(self.links_dict[int(page1.find('id').text)]))
@@ -185,9 +182,10 @@ class Indexer:
 
     def write_files(self):
         file_io.write_title_file(
-            self.title_path, self.title_dict)
+            self.title_path, self.title_dict) #writing to title but not to the other two?
         file_io.write_words_file(self.words_path, self.relevance_dict)
-        file_io.write_document_file(self.docs_path, self.current)
+        file_io.write_docs_file(self.docs_path, self.current)
+
 
 if __name__ == "__main__":
     if(len(sys.argv)-1 != 4):  # -1 cause the name of the script (e.g. "index.py")... can usually ignore

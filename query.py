@@ -1,9 +1,11 @@
 from re import M
 import sys
 import file_io
+import re
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 
-# where is the query? sys.argv?
-# where to rank
+# READ ME
 
 
 class Querier:
@@ -17,11 +19,7 @@ class Querier:
         self.docs_dict = {}
         self.words_dict = {}
 
-        self.query = []  # figure out how to populate this
-
-        # need to parse input in main - how and where
-
-        # if no results, print a message
+        self.query = []  # figure out how to populate this - i think i did this below
 
     def read_files(self):
 
@@ -49,7 +47,10 @@ class Querier:
         for id in list(sorted_dict.keys())[:10]:
             title_list.append(self.title_dict[id])
 
-        return title_list
+        if len(title_list) == 0:
+            raise ValueError("no results were found!")
+        else:
+            return title_list
 
     def page_rank_score(self):
         tot_sum = {}  # from id to sum value
@@ -71,22 +72,40 @@ class Querier:
         for id in list(sorted_dict.keys())[:10]:
             title_list.append(self.title_dict[id])
 
-        return title_list
+        if len(title_list) == 0:
+            raise ValueError("no results were found!")
+        else:
+            return title_list
 
 
-# main method should support the following:
-# python3 query.py[--pagerank] < titleIndex > <documentIndex > <wordIndex >
+def handle_query(query: str):  # figure out what to do with this
+    n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
+    stop_words = set(stopwords.words('english'))
+    make_stems = PorterStemmer()
+
+    query_corpus = set()
+
+    all_text = re.findall(n_regex, query)
+    for word in all_text:
+        if word not in stop_words:
+            query_corpus.add(make_stems.stem(word.lower()))
+
+
 if __name__ == "__main__":
+    if (len(sys.argv) == 5):
+        # include page rank
+        Querier(sys.argv[2], sys.argv[3], sys.argv[4]).page_rank_score()
+    elif (len(sys.argv) == 4):
+        # no page rank
+        Querier(sys.argv[1], sys.argv[2], sys.argv[3]).relevance_score()
+    else:
+        raise ValueError("invalid number of args")
+
     while True:
         query = input("What would you like to search:")
         if query == ":quit":
             break
-        if (len(sys.argv) == 5):
-            # include page rank - call helper
-            Querier(sys.argv[2], sys.argv[3], sys.argv[4]).page_rank_score()
-        elif (len(sys.argv) == 4):
-            # no page rank - call helper
-            Querier(sys.argv[1], sys.argv[2], sys.argv[3]).relevance_score()
-        else:
-            raise ValueError("invalid number of args")
+
+    handle_query(query)
+
     exit
