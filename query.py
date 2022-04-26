@@ -10,16 +10,19 @@ from nltk.stem import PorterStemmer
 
 class Querier:
 
-    def __init__(self, title_path: str, docs_path: str, words_path: str):
+    def __init__(self, title_path: str, docs_path: str, words_path: str, pg_rank: bool):
         self.title_path = title_path
         self.docs_path = docs_path
         self.words_path = words_path
+        self.pg_rank = pg_rank
 
         self.title_dict = {}
         self.docs_dict = {}
         self.words_dict = {}
 
-        self.query = []  # figure out how to populate this - i think i did this below
+        self.query_corpus = set()
+
+        self.title_list = []
 
     def read_files(self):
 
@@ -29,75 +32,72 @@ class Querier:
 
     def relevance_score(self):
         tot_sum = {}  # from id to sum value
-        for page in self.title_dict:
-            tot_sum[int(page.find('id').text)] = 0
-            for word in self.query:
-                tot_sum[int(page.find('id').text)
-                        ] += self.words_dict[word][int(page.find('id').text)]
 
-        sorted(tot_sum.values(), reverse=True)
-        sorted_dict = {}
+        for word in self.query_corpus:
+            for key in self.words_dict[word]:
+                tot_sum[int(key.find('id').text)] = 0
+                tot_sum[int(key.find('id').text)
+                        ] += self.words_dict[word][int(key.find('id').text)]
 
-        for i in sorted(tot_sum.values(), reverse=True):
-            for k in tot_sum.keys():
-                if tot_sum[k] == i:
-                    sorted_dict[k] = tot_sum[k]
+        sorted_dict = {k: v for k, v in sorted(
+            tot_sum.items(), key=lambda item: item[1], reverse=True)}
 
-        title_list = []
         for id in list(sorted_dict.keys())[:10]:
-            title_list.append(self.title_dict[id])
+            self.title_list.append(self.title_dict[id])
 
-        if len(title_list) == 0:
+        for id in list(sorted_dict.keys())[:10]:
+            self.title_list.append(self.title_dict[id])
+
+        if len(self.title_list) == 0:
             raise ValueError("no results were found!")
-        else:
-            return title_list
 
     def page_rank_score(self):
         tot_sum = {}  # from id to sum value
-        for page in self.title_dict:
-            tot_sum[int(page.find('id').text)] = 0
-            for word in self.query:
-                tot_sum[int(page.find('id').text)] += (self.words_dict[word]
-                                                       [int(page.find('id').text)] * self.docs_dict[int(page.find('id').text)])
+        for word in self.query_corpus:
+            for key in self.words_dict[word]:
+                tot_sum[int(key.find('id').text)] = 0
+                tot_sum[int(key.find('id').text)] += (self.words_dict[word]
+                                                      [int(key.find('id').text)] * self.docs_dict[int(key.find('id').text)])
 
-        sorted(tot_sum.values(), reverse=True)
-        sorted_dict = {}
+        sorted_dict = {k: v for k, v in sorted(
+            tot_sum.items(), key=lambda item: item[1], reverse=True)}
 
-        for i in sorted(tot_sum.values(), reverse=True):
-            for k in tot_sum.keys():
-                if tot_sum[k] == i:
-                    sorted_dict[k] = tot_sum[k]
-
-        title_list = []
         for id in list(sorted_dict.keys())[:10]:
-            title_list.append(self.title_dict[id])
+            self.title_list.append(self.title_dict[id])
 
-        if len(title_list) == 0:
+        if len(self.title_list) == 0:
             raise ValueError("no results were found!")
-        else:
-            return title_list
 
+    def print_list(self):
+        for x in range(0, len(self.title_list)):
+            print(str(x + 1) + ":" + self.title_list[x])
 
-def handle_query(query: str):  # figure out what to do with this
-    n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
-    stop_words = set(stopwords.words('english'))
-    make_stems = PorterStemmer()
+    def handle_query(self, query: str):
+        n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
+        stop_words = set(stopwords.words('english'))
+        make_stems = PorterStemmer()
 
-    query_corpus = set()
+        self.query_corpus = set()
 
-    all_text = re.findall(n_regex, query)
-    for word in all_text:
-        if word not in stop_words:
-            query_corpus.add(make_stems.stem(word.lower()))
+        all_text = re.findall(n_regex, query)
+        for word in all_text:
+            if word not in stop_words:
+                self.query_corpus.add(make_stems.stem(word.lower()))
+
+        if self.pg_rank == True:
+            self.page_rank_score()
+        elif self.pg_rank == False:
+            self.relevance_score()
+
+        self.print_list()
 
 
 if __name__ == "__main__":
+    q = None
     if (len(sys.argv) == 5):
-        # include page rank
-        Querier(sys.argv[2], sys.argv[3], sys.argv[4]).page_rank_score()
+        q = Querier(sys.argv[2], sys.argv[3], sys.argv[4], True)
     elif (len(sys.argv) == 4):
-        # no page rank
-        Querier(sys.argv[1], sys.argv[2], sys.argv[3]).relevance_score()
+        q = Querier(sys.argv[1], sys.argv[2], sys.argv[3], False)
     else:
         raise ValueError("invalid number of args")
 
@@ -105,7 +105,6 @@ if __name__ == "__main__":
         query = input("What would you like to search:")
         if query == ":quit":
             break
-
-    handle_query(query)
+        q.handle_query(query)
 
     exit

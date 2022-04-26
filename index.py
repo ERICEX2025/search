@@ -34,7 +34,10 @@ class Indexer:
         # self.title_dict = {}
 
         self.parser()
-        
+        self.determine_tf()
+        self.determine_idf()
+        self.determine_relevance()
+        self.page_rank()
         self.write_files()
 
     def parser(self):
@@ -160,11 +163,10 @@ class Indexer:
 
 
     def determine_tf(self):
-        
 
         return self.relevance_dict
 
-    def determine_idf(self):
+    def determine_idf(self):  # need to make sure all words in all text are lower case??
         doc_count = {}
         for word in self.word_corpus:
             doc_count[word] = 0
@@ -173,6 +175,8 @@ class Indexer:
 
         for page in self.all_pages:
             all_text = set(re.findall(n_regex, page.find('text').text))
+            all_titles = set(re.findall(n_regex, page.find('title').text))
+            all_text = all_text.union(all_titles)
             for word in all_text:
                 if make_stems.stem(word) in self.word_corpus:
                     doc_count[make_stems.stem(word)] += 1
@@ -230,7 +234,7 @@ class Indexer:
 
     def write_files(self):
         file_io.write_title_file(
-            self.title_path, self.title_dict) #writing to title but not to the other two?
+            self.title_path, self.title_dict)  # writing to title but not to the other two?
         file_io.write_words_file(self.words_path, self.relevance_dict)
         file_io.write_docs_file(self.docs_path, self.current)
 
