@@ -34,7 +34,11 @@ class Indexer:
         self.title_to_id = {}
 
         self.parser()
-        self.write_files()
+        # self.determine_tf()
+        # self.determine_idf()
+        # self.determine_relevance()
+        # self.page_rank()
+        # self.write_files()
 
     # I think we should have helper methods to split this up
     def parser(self):
@@ -182,7 +186,7 @@ class Indexer:
 
     def write_files(self):
         file_io.write_title_file(
-            self.title_path, self.title_dict) #writing to title but not to the other two?
+            self.title_path, self.title_dict)  # writing to title but not to the other two?
         file_io.write_words_file(self.words_path, self.relevance_dict)
         file_io.write_docs_file(self.docs_path, self.current)
 
