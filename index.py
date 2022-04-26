@@ -21,33 +21,51 @@ class Indexer:
         self.word_corpus = set()
         self.relevance_dict = {}
 
-        self.root = et.parse(self.xml_path).getroot()
-        self.all_pages = self.root.findall("page")
-        # Why don't we import all the words into the corpus here and pass it into parser
-
+        # pagerank
         self.previous = {}  # id --> rank r
         self.current = {}  # id --> rank r'
 
+        # pagerank
         self.links_dict = {}
-        self.title_dict = {}
-
+        # pagerank
         self.title_to_id = {}
 
+        # title dic
+        self.title_dict = {}
+
         self.parser()
+        
         self.write_files()
 
-    # I think we should have helper methods to split this up
     def parser(self):
+        # xml
+        self.root = et.parse(self.xml_path).getroot()
+        # returns list of pages
+        self.all_pages = self.root.findall("page")
+
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
         make_stems = PorterStemmer()
+        # for linkDic
         link_regex = '''\[\[[^\[]+?\]\]'''
 
+        # for every page
         for page in self.all_pages:
-            # is this for testing, (talking to myself) if so can get rid of
-            all_text = re.findall(n_regex, page.find('text').text)
-            all_titles = re.findall(n_regex, page.find('title').text)
-            all_text.extend(all_titles)
+            #okay I think there is a problem here because if word has | it is unioned and then also added again and stemmed
+
+            for word in all_text:
+                word.strip("[[ ]]")
+                # TODO deal with metapages
+                if ":" in word:
+                    word.split(":",)    
+                elif "|" in word:
+                    # WHAT ABOUT META PAGES! ah yes
+                    # why union? and not just add.
+                    # we need to keep track of the title as what the page links to, add it to the dictionary? somehow
+                    self.word_corpus.union(re.findall(
+                        n_regex, word[word.find("|")+1:]))  # look at
+                elif word not in stop_words:
+                    self.word_corpus.add(make_stems.stem(word.lower()))
 
             # loops through each page and adds page id and title to the title dic
             self.title_dict[int(page.find('id').text)] = page.find(
@@ -56,16 +74,10 @@ class Indexer:
             self.title_to_id[page.find('title').text] = int(
                 page.find('id').text)
 
-            for word in all_text:
-                # what happens if the word doesn't have [[]] aka not a link
-                word.strip("[[ ]]")
-                if "|" in word:
-                    # why union? and not just add.
-                    # we need to keep track of the title as what the page links to, add it to the dictionary? somehow
-                    self.word_corpus.union(re.findall(
-                        n_regex, word[word.find("|")+1:]))  # look at
-                if word not in stop_words:
-                    self.word_corpus.add(make_stems.stem(word.lower()))
+            all_text = re.findall(n_regex, page.find('text').text)
+            all_titles = re.findall(n_regex, page.find('title').text)
+            all_text.extend(all_titles)
+
 
         for page in self.all_pages:
             self.links_dict[int(page.find('id').text)] = set()
