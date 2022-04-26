@@ -34,11 +34,11 @@ class Indexer:
         self.title_to_id = {}
 
         self.parser()
-        # self.determine_tf()
-        # self.determine_idf()
-        # self.determine_relevance()
-        # self.page_rank()
-        # self.write_files()
+        self.determine_tf()
+        self.determine_idf()
+        self.determine_relevance()
+        self.page_rank()
+        self.write_files()
 
     # I think we should have helper methods to split this up
     def parser(self):
@@ -93,8 +93,11 @@ class Indexer:
             for page in self.all_pages:
                 count_dict[word][int(page.find('id').text)] = 0
 
-        for page in self.all_pages:
-            all_text = re.findall(n_regex, page.find('text').text)
+        for page in self.all_pages:  # need to make sure all words in all text are lower case??
+            all_text = re.findall(n_regex, page.find(
+                'text').text)
+            all_titles = re.findall(n_regex, page.find('title').text)
+            all_text.extend(all_titles)
             for word in all_text:
                 if make_stems.stem(word) in self.word_corpus:
                     count_dict[make_stems.stem(word)][int(
@@ -120,7 +123,7 @@ class Indexer:
 
         return self.relevance_dict
 
-    def determine_idf(self):
+    def determine_idf(self):  # need to make sure all words in all text are lower case??
         doc_count = {}
         for word in self.word_corpus:
             doc_count[word] = 0
@@ -129,6 +132,8 @@ class Indexer:
 
         for page in self.all_pages:
             all_text = set(re.findall(n_regex, page.find('text').text))
+            all_titles = set(re.findall(n_regex, page.find('title').text))
+            all_text = all_text.union(all_titles)
             for word in all_text:
                 if make_stems.stem(word) in self.word_corpus:
                     doc_count[make_stems.stem(word)] += 1
