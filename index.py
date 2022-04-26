@@ -13,118 +13,154 @@ import file_io
 class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
+        #instance variabling our given input and output files
         self.xml_path = xml
         self.title_path = title
         self.docs_path = doc
         self.words_path = word
 
-        self.word_corpus = set()
         self.relevance_dict = {}
 
-        # pagerank
-        self.previous = {}  # id --> rank r
-        self.current = {}  # id --> rank r'
+        # # pagerank
+        # self.previous = {}  # id --> rank r
+        # self.current = {}  # id --> rank r'
 
-        # pagerank
-        self.links_dict = {}
-        # pagerank
-        self.title_to_id = {}
+        # # pagerank
+        # self.links_dict = {}
+        # # pagerank
+        # self.title_to_id = {}
 
-        # title dic
-        self.title_dict = {}
+        # # title dic
+        # self.title_dict = {}
 
         self.parser()
         
         self.write_files()
 
     def parser(self):
-        # xml
-        self.root = et.parse(self.xml_path).getroot()
-        # returns list of pages
-        self.all_pages = self.root.findall("page")
-
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
         make_stems = PorterStemmer()
-        # for linkDic
-        link_regex = '''\[\[[^\[]+?\]\]'''
+        # link_regex = '''\[\[[^\[]+?\]\]'''
 
-        # for every page
+        # xml is the root
+        self.root = et.parse(self.xml_path).getroot()
+        self.all_pages = self.root.findall("page")
+        
+        num_of_pages = len(self.all_pages)
         for page in self.all_pages:
-            #okay I think there is a problem here because if word has | it is unioned and then also added again and stemmed
+            # for tf
+            aj_max_count = 0
+            set_of_words_in_this_page = set()
+            # for faster runtime
+            emptySet = set()
+            title = re.findall(n_regex, page.find('title').text)
+            text = re.findall(n_regex, page.find('text').text)
+            # Making it a set to reduce the words in all_text by removing the repetitive words 
+            all_text = emptySet.union(title, text)
 
             for word in all_text:
+                # first handle links
                 word.strip("[[ ]]")
-                # TODO deal with metapages
-                if ":" in word:
-                    word.split(":",)    
-                elif "|" in word:
-                    # WHAT ABOUT META PAGES! ah yes
-                    # why union? and not just add.
-                    # we need to keep track of the title as what the page links to, add it to the dictionary? somehow
-                    self.word_corpus.union(re.findall(
-                        n_regex, word[word.find("|")+1:]))  # look at
+
+                # case |
+                if "|" in word:
+                    list = re.findall(n_regex, word[word.find("|")+1:])  # look at
+                    for wrd in list:
+                        if wrd not in stop_words:
+                            lower_stemmed_word = make_stems.stem(wrd.lower())
+                            set_of_words_in_this_page.add(lower_stemmed_word)
+                            if lower_stemmed_word not in self.relevance_dict:
+                                empty_dic = {}
+                                empty_dic[int(page.find('id').text)] = 1
+                                self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
+                                if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                    aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                            else:
+                                if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                                else:
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
+                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+
+
+                # case :
+                elif ":" in word:
+                    list = re.findall(n_regex, word)
+                    for wrd in list:
+                       if wrd not in stop_words:
+                            lower_stemmed_word = make_stems.stem(wrd.lower())
+                            set_of_words_in_this_page.add(lower_stemmed_word)
+                            if lower_stemmed_word not in self.relevance_dict:
+                                empty_dic = {}
+                                empty_dic[int(page.find('id').text)] = 1
+                                self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
+                                if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                    aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]   
+                            else:
+                                if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                                else:
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
+                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+
+                # case not link
                 elif word not in stop_words:
-                    self.word_corpus.add(make_stems.stem(word.lower()))
+                    lower_stemmed_word = make_stems.stem(word.lower())
+                    set_of_words_in_this_page.add(lower_stemmed_word)
+                    if lower_stemmed_word not in self.relevance_dict:
+                        empty_dic = {}
+                        empty_dic[int(page.find('id').text)] = 1
+                        self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
+                        if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                    else:
+                        if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
+                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
+                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                            if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                        else:
+                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
+                            if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
+                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
 
+            for wordd in set_of_words_in_this_page:
+                tf = self.relevance_dict[wordd][int(page.find('id').text)]/aj_max_count
+                self.relevance_dict[wordd][int(page.find('id').text)] = tf 
+        for word in self.relevance_dict:
+            for doc in self.relevance_dict[word]:
+                self.relevance_dict[word][doc] = self.relevance_dict[word][doc] *\
+                    math.log(num_of_pages/)
             # loops through each page and adds page id and title to the title dic
-            self.title_dict[int(page.find('id').text)] = page.find(
-                'title').text.strip()
+            # self.title_dict[int(page.find('id').text)] = page.find(
+            #     'title').text.strip()
 
-            self.title_to_id[page.find('title').text] = int(
-                page.find('id').text)
+            # self.title_to_id[page.find('title').text] = int(
+            #     page.find('id').text)
 
-            all_text = re.findall(n_regex, page.find('text').text)
-            all_titles = re.findall(n_regex, page.find('title').text)
-            all_text.extend(all_titles)
+            # self.links_dict[int(page.find('id').text)] = set()
+            # all_links = re.findall(link_regex, page.find('text').text)
+            # for link in all_links:
+            #     stripped_link = link.strip("[[ ]]")
+            #     if "|" in stripped_link:
+            #         self.links_dict[int(page.find('id').text)].add(
+            #             self.title_to_id[stripped_link.partition("|")[0]])
+            #     else:
+            #         self.links_dict[int(page.find('id').text)].add(
+            #             self.title_to_id[stripped_link])
 
-
-        for page in self.all_pages:
-            self.links_dict[int(page.find('id').text)] = set()
-            all_links = re.findall(link_regex, page.find('text').text)
-            for link in all_links:
-                stripped_link = link.strip("[[ ]]")
-                if "|" in stripped_link:
-                    self.links_dict[int(page.find('id').text)].add(
-                        self.title_to_id[stripped_link.partition("|")[0]])
-                else:
-                    self.links_dict[int(page.find('id').text)].add(
-                        self.title_to_id[stripped_link])
 
     def determine_tf(self):
-        count_dict = {}  # word --> (id --> count)
-        n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
-        make_stems = PorterStemmer()
-
-        for word in self.word_corpus:
-            count_dict[word] = {}
-            for page in self.all_pages:
-                count_dict[word][int(page.find('id').text)] = 0
-
-        for page in self.all_pages:
-            all_text = re.findall(n_regex, page.find('text').text)
-            for word in all_text:
-                if make_stems.stem(word) in self.word_corpus:
-                    count_dict[make_stems.stem(word)][int(
-                        page.find('id').text)] += 1
-
-        max_list = {}
-        for key in count_dict:
-            for id in count_dict[key]:
-                max_list[id] = 0
-
-        for key in count_dict:
-            for id in count_dict[key]:
-                if count_dict[key][id] > max_list[id]:
-                    max_list[id] = count_dict[key][id]
-
-        for word in self.word_corpus:
-            self.relevance_dict[word] = {}
-
-        for page in self.all_pages:
-            for word in self.word_corpus:
-                self.relevance_dict[word][int(page.find('id').text)] = count_dict[word][int(
-                    page.find('id').text)]/max_list[int(page.find('id').text)]
+        
 
         return self.relevance_dict
 
