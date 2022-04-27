@@ -47,7 +47,7 @@ class Indexer:
         self.root = et.parse(self.xml_path).getroot()
         self.all_pages = self.root.findall("page")
         
-        num_of_pages = len(self.all_pages)
+        num_of_pages = 0
         for page in self.all_pages:
             # for tf
             aj_max_count = 0
@@ -76,8 +76,7 @@ class Indexer:
                                     aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
                             else:
                                 if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
                                     if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
                                         aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
                                 else:
@@ -101,8 +100,7 @@ class Indexer:
                                     aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]   
                             else:
                                 if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
                                     if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
                                         aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
                                 else:
@@ -122,8 +120,7 @@ class Indexer:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
                     else:
                         if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] =\
-                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] + 1 # add count 
+                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
                             if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
                         else:
@@ -134,6 +131,9 @@ class Indexer:
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][int(page.find('id').text)]/aj_max_count
                 self.relevance_dict[wordd][int(page.find('id').text)] = tf 
+            
+            num_of_pages += 1
+
         for word in self.relevance_dict:
             for doc in self.relevance_dict[word]:
                 self.relevance_dict[word][doc] = self.relevance_dict[word][doc] *\
