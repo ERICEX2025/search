@@ -52,12 +52,10 @@ class Indexer:
             # for tf
             aj_max_count = 0
             set_of_words_in_this_page = set()
-            # for faster runtime
-            emptySet = set()
+
             title = re.findall(n_regex, page.find('title').text)
             text = re.findall(n_regex, page.find('text').text)
-            # Making it a set to reduce the words in all_text by removing the repetitive words 
-            all_text = emptySet.union(title, text)
+            all_text = title.extend(text)
 
             for word in all_text:
                 # first handle links
