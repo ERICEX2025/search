@@ -52,92 +52,51 @@ class Indexer:
             # for tf
             aj_max_count = 0
             set_of_words_in_this_page = set()
-
             title = re.findall(n_regex, page.find('title').text)
-            text = re.findall(n_regex, page.find('text').text)
-            all_text = title.extend(text)
-
+            all_text = re.findall(n_regex, page.find('text').text)
+            all_text.extend(title)
+            page_id = int(page.find('id').text)
             for word in all_text:
-                # first handle links
+                # strip links
                 word.strip("[[ ]]")
-
+                if word in stop_words:
+                    continue
                 # case |
-                if "|" in word:
-                    list = re.findall(n_regex, word[word.find("|") + 1:])  # look at
-                    for wrd in list:
-                        if wrd not in stop_words:
-                            lower_stemmed_word = make_stems.stem(wrd.lower())
-                            set_of_words_in_this_page.add(lower_stemmed_word)
-                            if lower_stemmed_word not in self.relevance_dict:
-                                empty_dic = {}
-                                empty_dic[int(page.find('id').text)] = 1
-                                self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
-                                if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                    aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-                            else:
-                                if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
-                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-                                else:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
-                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-
-
+                elif "|" in word:
+                    list = re.findall(n_regex, word[word.find("|") + 1:])  
                 # case :
                 elif ":" in word:
                     list = re.findall(n_regex, word)
-                    for wrd in list:
-                       if wrd not in stop_words:
-                            lower_stemmed_word = make_stems.stem(wrd.lower())
-                            set_of_words_in_this_page.add(lower_stemmed_word)
-                            if lower_stemmed_word not in self.relevance_dict:
-                                empty_dic = {}
-                                empty_dic[int(page.find('id').text)] = 1
-                                self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
-                                if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                    aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]   
-                            else:
-                                if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
-                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-                                else:
-                                    self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
-                                    if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                        aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-
                 # case not link
-                elif word not in stop_words:
-                    lower_stemmed_word = make_stems.stem(word.lower())
-                    set_of_words_in_this_page.add(lower_stemmed_word)
-                    if lower_stemmed_word not in self.relevance_dict:
-                        empty_dic = {}
-                        empty_dic[int(page.find('id').text)] = 1
-                        self.relevance_dict[lower_stemmed_word] = empty_dic # initialize with count 1 
-                        if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-                    else:
-                        if int(page.find('id').text) in self.relevance_dict[lower_stemmed_word]:
-                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] += 1 # add count 
-                            if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
+                else:
+                    list = [word]
+                for wrd in list:
+                    if wrd not in stop_words:
+                        lower_stemmed_word = make_stems.stem(wrd.lower())
+                        set_of_words_in_this_page.add(lower_stemmed_word)
+                        if lower_stemmed_word not in self.relevance_dict:
+                            initialize_dic = {}
+                            initialize_dic[page_id] = 1
+                            self.relevance_dict[lower_stemmed_word] = initialize_dic # initialize with count 1 
+                            if aj_max_count == 0:
+                                aj_max_count = 1
                         else:
-                            self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] = 1
-                            if self.relevance_dict[lower_stemmed_word][int(page.find('id').text)] >= aj_max_count:
-                                aj_max_count = self.relevance_dict[lower_stemmed_word][int(page.find('id').text)]
-
+                            if page_id in self.relevance_dict[lower_stemmed_word]:
+                                self.relevance_dict[lower_stemmed_word][page_id] += 1 # add count 
+                            else:
+                                self.relevance_dict[lower_stemmed_word][page_id] = 1
+                            if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
+                                aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
             for wordd in set_of_words_in_this_page:
-                tf = self.relevance_dict[wordd][int(page.find('id').text)]/aj_max_count
-                self.relevance_dict[wordd][int(page.find('id').text)] = tf 
-            
+                tf = self.relevance_dict[wordd][page_id]/aj_max_count
+                self.relevance_dict[wordd][page_id] = tf 
             num_of_pages += 1
-
         for word in self.relevance_dict:
+            num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
-                self.relevance_dict[word][doc] = self.relevance_dict[word][doc] *\
-                    math.log(num_of_pages/len(self.relevance_dict[word]))
+                self.relevance_dict[word][doc] *= math.log(num_of_pages/num_of_page_for_word)
+
+
             # loops through each page and adds page id and title to the title dic
             # self.title_dict[int(page.find('id').text)] = page.find(
             #     'title').text.strip()
