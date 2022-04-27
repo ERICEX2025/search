@@ -23,9 +23,10 @@ class Indexer:
         self.title_dict = {}
         # relevance dic: words to dic of pages to relevance
         self.relevance_dict = {}
-
-        # pagerank id to title
+        # pagerank id to title will there be multiple pages that have the same title?
         self.links_dict = {}
+        # id --> rank r'
+        self.current = {} 
 
         self.parser()
         self.page_rank()
@@ -47,17 +48,19 @@ class Indexer:
         for page in self.all_pages:
             page_id = int(page.find('id').text)
             title = page.find('title').text
+
             # for title dic loops through each page and adds page id to coresponding title 
             self.title_dict[page_id] = title.strip()
             # for pagerank keep track of id to set of pages (through their title)
             self.links_dict[page_id] = set()
-            
-            # for tf
+            # for tf max count for a word
             aj_max_count = 0
             set_of_words_in_this_page = set()
+
             title_text = re.findall(n_regex, title)
             all_text = re.findall(n_regex, page.find('text').text)
             all_text.extend(title_text)
+
             for word in all_text:
                 # strip links
                 word.strip("[[ ]]")
@@ -67,7 +70,6 @@ class Indexer:
                 elif "|" in word:
                     self.links_dict[page_id].add(word[:word.find("|")])
                     list = re.findall(n_regex, word[word.find("|") + 1:])  
-
                 # case :
                 elif ":" in word:
                     self.links_dict[page_id].add(word)
@@ -92,32 +94,30 @@ class Indexer:
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
+            # populate with tf                    
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
                 self.relevance_dict[wordd][page_id] = tf 
             self.num_of_pages += 1
+        #populate with idf included
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
                 self.relevance_dict[word][doc] *= math.log(self.num_of_pages/num_of_page_for_word)
 
-
     def page_rank(self):
-        self.previous = {}  # id --> rank r
-        self.current = {}  # id --> rank r'
+        previous = {}  # id --> rank r
         for page in self.all_pages:
-            self.previous[int(page.find('id').text)] = 0
-
-        for page in self.all_pages:
+            previous[int(page.find('id').text)] = 0
             self.current[int(page.find('id').text)] = 1/len(self.all_pages)
 
-        while self.compute_dist(self.current, self.previous) > .001:
-            self.previous = self.current.copy()
+        while self.compute_dist(self.current, previous) > .001:
+            previous = self.current.copy()
             for j in self.all_pages:
                 self.current[int(j.find('id').text)] = 0
                 for k in self.all_pages:
                     self.current[int(j.find('id').text)] += self.compute_weights(
-                        k, j) * self.previous[int(k.find('id').text)]
+                        k, j) * previous[int(k.find('id').text)]
 
     def compute_weights(self, page1: str, page2: str):
         page1_id = int(page1.find('id').text)
