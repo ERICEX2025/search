@@ -1,5 +1,4 @@
 import sys
-# from turtle import title
 import xml.etree.ElementTree as et
 import re
 from nltk.corpus import stopwords
@@ -7,13 +6,12 @@ from nltk.stem import PorterStemmer
 import math
 import file_io
 
-# OPTIMIZE LATER - limit the number of for loops (we loop through all of the pages a couple of times - try to combine)!!!
-
+# OPTIMIZE
 
 class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
-        #instance variabling our given input and output files
+        #instaniating variabling our given input and output files
         self.xml_path = xml
         self.title_path = title
         self.docs_path = doc
@@ -25,8 +23,6 @@ class Indexer:
         self.relevance_dict = {}
         # pagerank id to title will there be multiple pages that have the same title?
         self.links_dict = {}
-        # id --> rank r'
-        self.current = {} 
 
         self.parser()
         self.page_rank()
@@ -107,6 +103,8 @@ class Indexer:
 
     def page_rank(self):
         previous = {}  # id --> rank r
+          # id --> rank r'
+        self.current = {} 
         for page in self.all_pages:
             previous[int(page.find('id').text)] = 0
             self.current[int(page.find('id').text)] = 1/len(self.all_pages)
