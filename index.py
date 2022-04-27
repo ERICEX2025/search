@@ -34,10 +34,7 @@ class Indexer:
         # self.title_dict = {}
 
         self.parser()
-        self.determine_tf()
-        self.determine_idf()
-        self.determine_relevance()
-        self.page_rank()
+        # self.page_rank()
         self.write_files()
 
     def parser(self):
@@ -68,7 +65,7 @@ class Indexer:
 
                 # case |
                 if "|" in word:
-                    list = re.findall(n_regex, word[word.find("|")+1:])  # look at
+                    list = re.findall(n_regex, word[word.find("|") + 1:])  # look at
                     for wrd in list:
                         if wrd not in stop_words:
                             lower_stemmed_word = make_stems.stem(wrd.lower())
@@ -142,7 +139,7 @@ class Indexer:
         for word in self.relevance_dict:
             for doc in self.relevance_dict[word]:
                 self.relevance_dict[word][doc] = self.relevance_dict[word][doc] *\
-                    math.log(num_of_pages/)
+                    math.log(num_of_pages/len(self.relevance_dict[word]))
             # loops through each page and adds page id and title to the title dic
             # self.title_dict[int(page.find('id').text)] = page.find(
             #     'title').text.strip()
@@ -161,40 +158,6 @@ class Indexer:
             #         self.links_dict[int(page.find('id').text)].add(
             #             self.title_to_id[stripped_link])
 
-
-    def determine_tf(self):
-
-        return self.relevance_dict
-
-    def determine_idf(self):  # need to make sure all words in all text are lower case??
-        doc_count = {}
-        for word in self.word_corpus:
-            doc_count[word] = 0
-        n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
-        make_stems = PorterStemmer()
-
-        for page in self.all_pages:
-            all_text = set(re.findall(n_regex, page.find('text').text))
-            all_titles = set(re.findall(n_regex, page.find('title').text))
-            all_text = all_text.union(all_titles)
-            for word in all_text:
-                if make_stems.stem(word) in self.word_corpus:
-                    doc_count[make_stems.stem(word)] += 1
-
-        n = len(self.all_pages)
-
-        for word in self.word_corpus:
-            doc_count[word] = math.log(n/doc_count[word])
-
-        return doc_count
-
-    def determine_relevance(self):  # might do this is separate step
-
-        idf_dict = self.determine_idf()
-        for key in idf_dict:
-            for page in self.all_pages:
-                self.relevance_dict[key][int(page.find('id').text)] = self.relevance_dict[
-                    key][int(page.find('id').text)] * idf_dict[key]
 
     def page_rank(self):
 
@@ -233,10 +196,10 @@ class Indexer:
         return math.dist(curr, prev)
 
     def write_files(self):
-        file_io.write_title_file(
-            self.title_path, self.title_dict)  # writing to title but not to the other two?
+        # file_io.write_title_file(
+        #     self.title_path, self.title_dict)  # writing to title but not to the other two?
         file_io.write_words_file(self.words_path, self.relevance_dict)
-        file_io.write_docs_file(self.docs_path, self.current)
+        # file_io.write_docs_file(self.docs_path, self.current)
 
 
 if __name__ == "__main__":
