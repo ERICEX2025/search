@@ -13,7 +13,7 @@ import file_io
 class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
-        #instance variabling our given input and output files
+        # instance variabling our given input and output files
         self.xml_path = xml
         self.title_path = title
         self.docs_path = doc
@@ -26,7 +26,7 @@ class Indexer:
         # pagerank id to title will there be multiple pages that have the same title?
         self.links_dict = {}
         # id --> rank r'
-        self.current = {} 
+        self.current = {}
 
         self.parser()
         self.page_rank()
@@ -43,13 +43,13 @@ class Indexer:
         # xml is the root
         self.root = et.parse(self.xml_path).getroot()
         self.all_pages = self.root.findall("page")
-        
+
         self.num_of_pages = 0
         for page in self.all_pages:
             page_id = int(page.find('id').text)
             title = page.find('title').text
 
-            # for title dic loops through each page and adds page id to coresponding title 
+            # for title dic loops through each page and adds page id to coresponding title
             self.title_dict[page_id] = title.strip()
             # for pagerank keep track of id to set of pages (through their title)
             self.links_dict[page_id] = set()
@@ -69,7 +69,7 @@ class Indexer:
                 # case |
                 elif "|" in word:
                     self.links_dict[page_id].add(word[:word.find("|")])
-                    list = re.findall(n_regex, word[word.find("|") + 1:])  
+                    list = re.findall(n_regex, word[word.find("|") + 1:])
                 # case :
                 elif ":" in word:
                     self.links_dict[page_id].add(word)
@@ -84,26 +84,29 @@ class Indexer:
                         if lower_stemmed_word not in self.relevance_dict:
                             initialize_dic = {}
                             initialize_dic[page_id] = 1
-                            self.relevance_dict[lower_stemmed_word] = initialize_dic # initialize with count 1 
+                            # initialize with count 1
+                            self.relevance_dict[lower_stemmed_word] = initialize_dic
                             if aj_max_count == 0:
                                 aj_max_count = 1
                         else:
                             if page_id in self.relevance_dict[lower_stemmed_word]:
-                                self.relevance_dict[lower_stemmed_word][page_id] += 1 # add count 
+                                # add count
+                                self.relevance_dict[lower_stemmed_word][page_id] += 1
                             else:
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
-            # populate with tf                    
+            # populate with tf
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
-                self.relevance_dict[wordd][page_id] = tf 
+                self.relevance_dict[wordd][page_id] = tf
             self.num_of_pages += 1
-        #populate with idf included
+        # populate with idf included
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
-                self.relevance_dict[word][doc] *= math.log(self.num_of_pages/num_of_page_for_word)
+                self.relevance_dict[word][doc] *= math.log(
+                    self.num_of_pages/num_of_page_for_word)
 
     def page_rank(self):
         previous = {}  # id --> rank r
@@ -142,7 +145,7 @@ class Indexer:
         return math.dist(curr, prev)
 
     def write_files(self):
-        file_io.write_title_file(self.title_path, self.title_dict) 
+        file_io.write_title_file(self.title_path, self.title_dict)
         file_io.write_words_file(self.words_path, self.relevance_dict)
         file_io.write_docs_file(self.docs_path, self.current)
 
