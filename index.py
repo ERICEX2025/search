@@ -18,11 +18,15 @@ class Indexer:
         self.words_path = word
 
         # title dic: id to title
-        self.title_dict = {}
+        self.id_title_dict = {}
+        self.title_id_dict = {}
         # relevance dic: words to dic of pages to relevance
         self.relevance_dict = {}
         # pagerank id to title will there be multiple pages that have the same title?
         self.links_dict = {}
+        # pagerank calculation
+        self.previous = {}  # id --> rank r
+        self.current = {} # id --> rank r'
 
         self.parser()
         self.page_rank()
@@ -40,15 +44,25 @@ class Indexer:
         self.root = et.parse(self.xml_path).getroot()
         self.all_pages = self.root.findall("page")
 
-        self.num_of_pages = 0
+        self.num_of_pages = len(self.all_pages)
+        for page in self.all_pages:
+            page_id = int(page.find('id').text)
+            title = page.find('title').text
+            self.previous[page_id] = 0
+            self.current[page_id] = 1/self.num_of_pages
+            # for title dic loops through each page and adds page id to coresponding title
+            self.id_title_dict[page_id] = title.strip()
+            self.title_id_dict[title.strip()] = page_id
+
         for page in self.all_pages:
             page_id = int(page.find('id').text)
             title = page.find('title').text
 
             # for title dic loops through each page and adds page id to coresponding title
-            self.title_dict[page_id] = title.strip()
+            self.id_title_dict[page_id] = title.strip()
             # for pagerank keep track of id to set of pages (through their title)
             self.links_dict[page_id] = set()
+           
             # for tf max count for a word
             aj_max_count = 0
             set_of_words_in_this_page = set()
@@ -64,6 +78,7 @@ class Indexer:
                     continue
                 # case |
                 elif "|" in word:
+                    if word[word.find("|") + 1:] in
                     self.links_dict[page_id].add(word[:word.find("|")])
                     list = re.findall(n_regex, word[word.find("|") + 1:])
                 # case :
@@ -96,7 +111,6 @@ class Indexer:
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
                 self.relevance_dict[wordd][page_id] = tf
-            self.num_of_pages += 1
         # populate with idf included
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
@@ -105,33 +119,13 @@ class Indexer:
                     self.num_of_pages/num_of_page_for_word)
 
     def page_rank(self):
-        previous = {}  # id --> rank r
-          # id --> rank r'
-        self.current = {} 
-        for page in self.all_pages:
-            previous[int(page.find('id').text)] = 0
-            self.current[int(page.find('id').text)] = 1/len(self.all_pages)
-
-        while self.compute_dist(self.current, previous) > .001:
-            previous = self.current.copy()
+        while self.compute_dist(self.current, self.previous) > .001:
+            self.previous = self.current.copy()
             for j in self.all_pages:
                 self.current[int(j.find('id').text)] = 0
                 for k in self.all_pages:
                     self.current[int(j.find('id').text)] += self.compute_weights(
-                        k, j) * previous[int(k.find('id').text)]
-
-    def compute_weights(self, page1: str, page2: str):
-        page1_id = int(page1.find('id').text)
-        page2_id = int(page2.find('id').text)
-        page2_title = page2.find('title').text
-        if page1_id == page2_id:
-            return 0.15/self.num_of_pages
-        elif len(self.links_dict[page1_id]) == 0:
-            return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
-        elif page2_title in self.links_dict[int(page1.find('id').text)]:
-            return 0.15/self.num_of_pages + (1 - 0.15)*(1/len(self.links_dict[int(page1.find('id').text)]))
-        elif page2_title not in self.links_dict[int(page1.find('id').text)]:
-            return 0.15/self.num_of_pages
+                        k, j) * self.previous[int(k.find('id').text)]
 
     def compute_dist(self, previous: dict, current: dict):
         prev = []
@@ -141,6 +135,19 @@ class Indexer:
         for key in current:
             curr.append(current[key])
         return math.dist(curr, prev)
+
+    def compute_weights(self, page1: str, page2: str):
+        page1_id = int(page1.find('id').text)
+        page2_id = int(page2.find('id').text)
+        page2_title = page2.find('title').text
+        if page1_id == page2_id:
+            return 0.15/self.num_of_pages
+        elif len(self.links_dict[page1_id]) == 0:
+            return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
+        elif page2_title in self.links_dict[page1_id]:
+            return 0.15/self.num_of_pages + (1 - 0.15)*(1/len(self.links_dict[page1_id]))
+        elif page2_title not in self.links_dict[page1_id]:
+            return 0.15/self.num_of_pages
 
     def write_files(self):
         file_io.write_title_file(self.title_path, self.title_dict)
