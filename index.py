@@ -127,7 +127,11 @@ class Indexer:
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
                 self.relevance_dict[wordd][page_id] = tf
-        # populate with idf included
+        self.idf()
+    
+
+    def idf(self):
+        # populate with idf 
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
@@ -142,6 +146,7 @@ class Indexer:
                 for k in self.all_pages:
                     self.current[int(j.find('id').text)] += self.compute_weights(
                         k, j) * self.previous[int(k.find('id').text)]
+                    print(self.current)
 
     def compute_dist(self, previous: dict, current: dict):
         prev = []
@@ -155,8 +160,6 @@ class Indexer:
     def compute_weights(self, page1: str, page2: str):
         page1_id = int(page1.find('id').text)
         page2_id = int(page2.find('id').text)
-        # if page1_id == page2_id:
-        #     return 0.15/self.num_of_pages
         if len(self.links_dict[page1_id]) == 0:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
         elif page2_id in self.links_dict[page1_id]:
