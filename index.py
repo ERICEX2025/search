@@ -81,12 +81,8 @@ class Indexer:
                 stripped_word = word.strip("[[ ]]")
                 # case |
                 if "|" in stripped_word:
-                    print(self.title_id_dict)
-                    print(stripped_word[0:stripped_word.find("|")])
                     if stripped_word[0:stripped_word.find("|")] in self.title_id_dict and self.title_id_dict[stripped_word[0:stripped_word.find("|")]] != page_id:
                         self.links_dict[page_id].add(
-                            self.title_id_dict[stripped_word[:stripped_word.find("|")]])
-                        print(
                             self.title_id_dict[stripped_word[:stripped_word.find("|")]])
                     list = re.findall(
                         n_regex, stripped_word[stripped_word.find("|") + 1:])
@@ -160,6 +156,8 @@ class Indexer:
     def compute_weights(self, page1: str, page2: str):
         page1_id = int(page1.find('id').text)
         page2_id = int(page2.find('id').text)
+        if page1_id == page2_id:
+            return 0.15/self.num_of_pages
         if len(self.links_dict[page1_id]) == 0:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
         elif page2_id in self.links_dict[page1_id]:

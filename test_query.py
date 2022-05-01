@@ -33,4 +33,4 @@ def test_query_page_rank():
                             'C': {1: 0.4054651081081644, 3: 0.4054651081081644},
                             'F': {3: 1.0986122886681098}}
     assert b.query_corpus is {"A"}
-    assert b.title_list is
+    assert b.title_list is 

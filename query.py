@@ -106,5 +106,3 @@ if __name__ == "__main__":
         if query == ":quit":
             break
         q.handle_query(query)
-
-    exit  # need or no?
