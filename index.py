@@ -153,6 +153,12 @@ class Indexer:
         """ Calculates the page rank based on how the pages
         are linked to each other (the links in the pages)
         """
+        # for if there is just one page
+        if self.num_of_pages == 1:
+            for j in self.all_pages:
+                self.current[int(j.find('id').text)] = 1
+                return
+
         # while current and previous are not close enough
         while self.compute_dist(self.current, self.previous) > .001:
             # set previous to current
@@ -178,6 +184,7 @@ class Indexer:
             prev.append(previous[key])
         for key in current:
             curr.append(current[key])
+        print(math.dist(curr, prev))
         return math.dist(curr, prev)
 
     def compute_weights(self, page1: str, page2: str):

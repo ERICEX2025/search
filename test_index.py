@@ -120,7 +120,7 @@ def test_one_page():
     assert g.relevance_dict == {'page': {1: 0.0},
                                 'first': {1: 0.0}}  # should this be 0?
     assert g.links_dict == {1: set()}
-    assert g.current == {1: 7.59375e-05}  # is this correct?
+    assert g.current == {1: 1}  
 
 
 """Tests Indexer functions when none of the pages have titles - original xml file"""
@@ -173,8 +173,7 @@ def test_one_word():
     assert k.id_title_dict == {1: 'title'}
     assert k.relevance_dict == {'titl': {1: 0.0}}
     assert k.links_dict == {1: set()}
-    # assert k.current == {1: 1}  # ask if this should be 1?? .0000759375
-
+    assert k.current == {1: 1}  # ask if this should be 1?? .0000759375
 
 """Tests Indexer functions when there are no pages in the xml file - original xml file"""
 
