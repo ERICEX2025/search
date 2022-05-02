@@ -60,7 +60,7 @@ class Indexer:
         """
         for page in self.all_pages:
             page_id = int(page.find('id').text)
-            title = page.find('title').text.strip
+            title = page.find('title').text.strip()
             self.previous[page_id] = 0
             self.current[page_id] = 1/self.num_of_pages
             self.id_title_dict[page_id] = title
@@ -77,7 +77,7 @@ class Indexer:
 
         for page in self.all_pages:
             page_id = int(page.find('id').text)
-            title = page.find('title').text.strip
+            title = page.find('title').text.strip()
             self.links_dict[page_id] = set()
             # for tf max count for a word and to calculate the tfs for 
             # each word in this page
