@@ -6,12 +6,22 @@ from nltk.stem import PorterStemmer
 import math
 import file_io
 
-# OPTIMIZE
-
 
 class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
+        """Sums two numbers
+
+        Parameters:
+        x -- the first number
+        y -- the second number
+        
+        Returns:
+        A number (the sum of x and y)
+        
+        Throws: 
+        BadInputError if x or y (or both) is not a number
+        """
         # instaniating variabling our given input and output files
         self.xml_path = xml
         self.title_path = title
@@ -29,9 +39,26 @@ class Indexer:
         self.previous = {}  # id --> rank r
         self.current = {}  # id --> rank r'
 
+        # xml is the root
+        root = et.parse(self.xml_path).getroot()
+        self.all_pages = root.findall("page")
+        self.num_of_pages = len(self.all_pages)
+
+        self.setup()
         self.parser()
+        self.idf()
         self.page_rank()
         self.write_files()
+
+    def setup(self):
+        for page in self.all_pages:
+            page_id = int(page.find('id').text)
+            title = page.find('title').text.strip
+            self.previous[page_id] = 0
+            self.current[page_id] = 1/self.num_of_pages
+            # for title dic loops through each page and adds page id to coresponding title
+            self.id_title_dict[page_id] = title
+            self.title_id_dict[title] = page_id
 
     def parser(self):
         '''Populates the rel dic: dictionary of words to dictionary of documents to relevance
@@ -39,36 +66,17 @@ class Indexer:
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
         make_stems = PorterStemmer()
-        # link_regex = '''\[\[[^\[]+?\]\]'''
-
-        # xml is the root
-        self.root = et.parse(self.xml_path).getroot()
-        self.all_pages = self.root.findall("page")
-
-        self.num_of_pages = len(self.all_pages)
-        for page in self.all_pages:
-            page_id = int(page.find('id').text)
-            title = page.find('title').text
-            self.previous[page_id] = 0
-            self.current[page_id] = 1/self.num_of_pages
-            # for title dic loops through each page and adds page id to coresponding title
-            self.id_title_dict[page_id] = title.strip()
-            self.title_id_dict[title.strip()] = page_id
 
         for page in self.all_pages:
             page_id = int(page.find('id').text)
             title = page.find('title').text
-
             # for title dic loops through each page and adds page id to coresponding title
             self.id_title_dict[page_id] = title.strip()
             # for pagerank keep track of id to set of pages (through their title)
-            empty_set = set()
-            self.links_dict[page_id] = empty_set
-
+            self.links_dict[page_id] = set()
             # for tf max count for a word
-            aj_max_count = 0
+            aj_max_count = 1
             set_of_words_in_this_page = set()
-
             title_text = re.findall(n_regex, title)
             all_text = re.findall(n_regex, page.find('text').text)
             all_text.extend(title_text)
@@ -77,27 +85,22 @@ class Indexer:
                 is_link = False
                 if "[[" in word and "]]" in word:
                     is_link = True
-                # strip links
                 stripped_word = word.strip("[[ ]]")
                 # case |
                 if "|" in stripped_word:
-                    if stripped_word[0:stripped_word.find("|")] in self.title_id_dict and self.title_id_dict[stripped_word[0:stripped_word.find("|")]] != page_id:
+                    if stripped_word[0:stripped_word.find("|")] in self.title_id_dict\
+                        and self.title_id_dict[stripped_word[0:stripped_word.find("|")]] != page_id:
                         self.links_dict[page_id].add(
                             self.title_id_dict[stripped_word[:stripped_word.find("|")]])
                     list = re.findall(
                         n_regex, stripped_word[stripped_word.find("|") + 1:])
                 # case :
-                elif ":" in stripped_word:
+                elif ":" in stripped_word or is_link:
                     if stripped_word in self.title_id_dict and self.title_id_dict[stripped_word] != page_id:
                         self.links_dict[page_id].add(
                             self.title_id_dict[stripped_word])
                     list = re.findall(n_regex, stripped_word)
                 # case not link
-                elif is_link:
-                    if stripped_word in self.title_id_dict and self.title_id_dict[stripped_word] != page_id:
-                        self.links_dict[page_id].add(
-                            self.title_id_dict[stripped_word])
-                    list = re.findall(n_regex, stripped_word)
                 else:
                     list = [stripped_word]
                 for wrd in list:
@@ -109,8 +112,6 @@ class Indexer:
                             initialize_dic[page_id] = 1
                             # initialize with count 1
                             self.relevance_dict[lower_stemmed_word] = initialize_dic
-                            if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
-                                aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
                         else:
                             if page_id in self.relevance_dict[lower_stemmed_word]:
                                 # add count
@@ -122,12 +123,9 @@ class Indexer:
             # populate with tf
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
-                self.relevance_dict[wordd][page_id] = tf
-        self.idf()
-    
 
     def idf(self):
-        # populate with idf 
+        # populate with idf
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
@@ -171,7 +169,18 @@ class Indexer:
         file_io.write_docs_file(self.docs_path, self.current)
 
 
+
 if __name__ == "__main__":
+    """Main method that handles the inputs for indexer
+    prints wrong number of arguments if there aren't 4 arguments passed in
+
+    Parameters:
+    wiki xml file
+    title text file
+    doc text file
+    word text file
+    """
+    
     if(len(sys.argv)-1 != 4):  # -1 cause the name of the script (e.g. "index.py")... can usually ignore
         print("Wrong number of arguments!!!")
     else:
