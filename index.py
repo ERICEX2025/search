@@ -17,27 +17,23 @@ class Indexer:
         """Constructor for Indexer
 
         Parameters:
-        xml -- the first number
-        y -- the second number
-        
-        Returns:
-        A number (the sum of x and y)
-        
-        Throws: 
-        BadInputError if x or y (or both) is not a number
+        xml -- The wiki.xml to parse
+        title -- the title.txt document to write to
+        doc -- the doc.txt document to write to
+        word -- the word.txt document to write to
         """
         # instaniating variabling our given input and output files
         self.xml_path = xml
         self.title_path = title
         self.docs_path = doc
         self.words_path = word
-
         # title dic: id to title
         self.id_title_dict = {}
+        # dic to look up ids through title
         self.title_id_dict = {}
         # relevance dic: words to dic of pages to relevance
         self.relevance_dict = {}
-        # pagerank id to title will there be multiple pages that have the same title?
+        # pagerank id to sets of ids that it links to 
         self.links_dict = {}
         # pagerank calculation
         self.previous = {}  # id --> rank r
@@ -55,17 +51,24 @@ class Indexer:
         self.write_files()
 
     def setup(self):
+        """ sets up 
+        self.previous
+        self.current
+        self.id_title_dict
+        self.title_id_dict
+        with their initial values
+        """
         for page in self.all_pages:
             page_id = int(page.find('id').text)
             title = page.find('title').text.strip
             self.previous[page_id] = 0
             self.current[page_id] = 1/self.num_of_pages
-            # for title dic loops through each page and adds page id to coresponding title
-            self.id_title_dict[page_id] = title
+            self.id_title_dict[page_id] = title.strip()
             self.title_id_dict[title] = page_id
 
     def parser(self):
-        '''Populates the rel dic: dictionary of words to dictionary of documents to relevance
+        ''' Parser parses through the wiki file and Populates the 
+        rel dic: dictionary of words to dictionary of documents to count
         '''
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
@@ -73,20 +76,20 @@ class Indexer:
 
         for page in self.all_pages:
             page_id = int(page.find('id').text)
-            title = page.find('title').text
-            # for title dic loops through each page and adds page id to coresponding title
-            self.id_title_dict[page_id] = title.strip()
-            # for pagerank keep track of id to set of pages (through their title)
+            title = page.find('title').text.strip
             self.links_dict[page_id] = set()
-            # for tf max count for a word
+            # for tf max count for a word and to calculate the tfs for 
+            # each word in this page
             aj_max_count = 1
             set_of_words_in_this_page = set()
+
             title_text = re.findall(n_regex, title)
             all_text = re.findall(n_regex, page.find('text').text)
             all_text.extend(title_text)
 
             for word in all_text:
                 is_link = False
+
                 if "[[" in word and "]]" in word:
                     is_link = True
                 stripped_word = word.strip("[[ ]]")
@@ -98,7 +101,7 @@ class Indexer:
                             self.title_id_dict[stripped_word[:stripped_word.find("|")]])
                     list = re.findall(
                         n_regex, stripped_word[stripped_word.find("|") + 1:])
-                # case :
+                # case : or link
                 elif ":" in stripped_word or is_link:
                     if stripped_word in self.title_id_dict and self.title_id_dict[stripped_word] != page_id:
                         self.links_dict[page_id].add(
@@ -107,26 +110,32 @@ class Indexer:
                 # case not link
                 else:
                     list = [stripped_word]
+
                 for wrd in list:
                     if wrd not in stop_words:
                         lower_stemmed_word = make_stems.stem(wrd.lower())
                         set_of_words_in_this_page.add(lower_stemmed_word)
+                        # if word does not exist in the rel dic
                         if lower_stemmed_word not in self.relevance_dict:
                             initialize_dic = {}
                             initialize_dic[page_id] = 1
                             # initialize with count 1
                             self.relevance_dict[lower_stemmed_word] = initialize_dic
                         else:
+                            # if word exists and and in that same page
                             if page_id in self.relevance_dict[lower_stemmed_word]:
                                 # add count
                                 self.relevance_dict[lower_stemmed_word][page_id] += 1
-                            else:
+                            else: # if word exists but not the page
+                                #initialize with count 1
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
+                                
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
             # populate with tf
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
+                self.relevance_dict[wordd][page_id] = tf
 
     def idf(self):
         # populate with idf
