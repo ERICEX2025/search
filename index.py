@@ -63,12 +63,13 @@ class Indexer:
             title = page.find('title').text.strip
             self.previous[page_id] = 0
             self.current[page_id] = 1/self.num_of_pages
-            self.id_title_dict[page_id] = title.strip()
+            self.id_title_dict[page_id] = title
             self.title_id_dict[title] = page_id
 
     def parser(self):
         ''' Parser parses through the wiki file and Populates the 
         rel dic: dictionary of words to dictionary of documents to count
+        and then changes count to rel tf value
         '''
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         stop_words = set(stopwords.words('english'))
@@ -129,7 +130,7 @@ class Indexer:
                             else: # if word exists but not the page
                                 #initialize with count 1
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
-                                
+
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
             # populate with tf
@@ -138,6 +139,9 @@ class Indexer:
                 self.relevance_dict[wordd][page_id] = tf
 
     def idf(self):
+        """ Goes through the Rel dic and multiplies the
+        tf with the idf value to get the true rel value
+        """
         # populate with idf
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
@@ -146,6 +150,9 @@ class Indexer:
                     self.num_of_pages/num_of_page_for_word)
 
     def page_rank(self):
+        """ Calculates the page rank based on how the pages
+        are linked to each other (the links in the pages)
+        """
         while self.compute_dist(self.current, self.previous) > .001:
             self.previous = self.current.copy()
             for j in self.all_pages:
@@ -156,6 +163,9 @@ class Indexer:
                     print(self.current)
 
     def compute_dist(self, previous: dict, current: dict):
+        """ takes the prev rank and calculates + returns the Euclidean distance
+        """
+        # moves the keys from the dics to arrays for math.dist
         prev = []
         curr = []
         for key in previous:
@@ -165,18 +175,30 @@ class Indexer:
         return math.dist(curr, prev)
 
     def compute_weights(self, page1: str, page2: str):
+        """ Computes the weights comparing page by page 
+        and returns the weight based on page1 going to page2
+        Takes care of the special cases
+        """
         page1_id = int(page1.find('id').text)
         page2_id = int(page2.find('id').text)
+        # if they link to the same page
         if page1_id == page2_id:
             return 0.15/self.num_of_pages
+        # if page 1 links to nothing, link to everywhere but itself
         elif len(self.links_dict[page1_id]) == 0:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
+        # if page 1 links to page 2
         elif page2_id in self.links_dict[page1_id]:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/len(self.links_dict[page1_id]))
+        # if page 1 does not link to page 2
         elif page2_id not in self.links_dict[page1_id]:
             return 0.15/self.num_of_pages
 
     def write_files(self):
+        """ Writes to the given files using file.io methods
+        takes in the dictionaries that we filled using
+        page rank and parser
+        """
         file_io.write_title_file(self.title_path, self.id_title_dict)
         file_io.write_words_file(self.words_path, self.relevance_dict)
         file_io.write_docs_file(self.docs_path, self.current)
