@@ -7,7 +7,6 @@ from nltk.stem import PorterStemmer
 
 # READ ME
 
-
 class Querier:
 
     def __init__(self, title_path: str, docs_path: str, words_path: str, pg_rank: bool):
@@ -93,6 +92,8 @@ class Querier:
 
 
 if __name__ == "__main__":
+    """
+    """
     q = None
     if (len(sys.argv) == 5):
         q = Querier(sys.argv[2], sys.argv[3], sys.argv[4], True)
