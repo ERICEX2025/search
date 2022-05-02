@@ -8,12 +8,16 @@ import file_io
 
 
 class Indexer:
+    """Indexer class gets called from the main
+    to parse wifi files and write to txt files for
+    Query to use
+    """
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
-        """Sums two numbers
+        """Constructor for Indexer
 
         Parameters:
-        x -- the first number
+        xml -- the first number
         y -- the second number
         
         Returns:
@@ -172,7 +176,7 @@ class Indexer:
 
 if __name__ == "__main__":
     """Main method that handles the inputs for indexer
-    prints wrong number of arguments if there aren't 4 arguments passed in
+    prints "Wrong number of arguments!!!" if there aren't 4 arguments passed in
 
     Parameters:
     wiki xml file
