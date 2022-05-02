@@ -1,0 +1,35 @@
+<xml>
+  <page>
+    <title>
+      dogs
+    </title>
+    <id>
+      1
+    </id>
+    <text>
+      this is a page about dogs
+    </text>
+  </page>
+    <page>
+    <title>
+      cats
+    </title>
+    <id>
+      1
+    </id>
+    <text>
+      this is a page about cats
+    </text>
+  </page>
+    <page>
+    <title>
+      dogs
+    </title>
+    <id>
+      1
+    </id>
+    <text>
+      this is another page about dogs
+    </text>
+  </page>
+</xml>

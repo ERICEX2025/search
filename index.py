@@ -33,7 +33,7 @@ class Indexer:
         self.title_id_dict = {}
         # relevance dic: words to dic of pages to relevance
         self.relevance_dict = {}
-        # pagerank id to sets of ids that it links to 
+        # pagerank id to sets of ids that it links to
         self.links_dict = {}
         # pagerank calculation
         self.previous = {}  # id --> rank r
@@ -60,7 +60,7 @@ class Indexer:
         """
         for page in self.all_pages:
             page_id = int(page.find('id').text)
-            title = page.find('title').text.strip
+            title = page.find('title').text.strip()
             self.previous[page_id] = 0
             self.current[page_id] = 1/self.num_of_pages
             self.id_title_dict[page_id] = title
@@ -77,9 +77,9 @@ class Indexer:
 
         for page in self.all_pages:
             page_id = int(page.find('id').text)
-            title = page.find('title').text.strip
+            title = page.find('title').text.strip()
             self.links_dict[page_id] = set()
-            # for tf max count for a word and to calculate the tfs for 
+            # for tf max count for a word and to calculate the tfs for
             # each word in this page
             aj_max_count = 1
             set_of_words_in_this_page = set()
@@ -97,7 +97,7 @@ class Indexer:
                 # case |
                 if "|" in stripped_word:
                     if stripped_word[0:stripped_word.find("|")] in self.title_id_dict\
-                        and self.title_id_dict[stripped_word[0:stripped_word.find("|")]] != page_id:
+                            and self.title_id_dict[stripped_word[0:stripped_word.find("|")]] != page_id:
                         self.links_dict[page_id].add(
                             self.title_id_dict[stripped_word[:stripped_word.find("|")]])
                     list = re.findall(
@@ -127,8 +127,8 @@ class Indexer:
                             if page_id in self.relevance_dict[lower_stemmed_word]:
                                 # add count
                                 self.relevance_dict[lower_stemmed_word][page_id] += 1
-                            else: # if word exists but not the page
-                                #initialize with count 1
+                            else:  # if word exists but not the page
+                                # initialize with count 1
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
 
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
@@ -204,7 +204,6 @@ class Indexer:
         file_io.write_docs_file(self.docs_path, self.current)
 
 
-
 if __name__ == "__main__":
     """Main method that handles the inputs for indexer
     prints "Wrong number of arguments!!!" if there aren't 4 arguments passed in
@@ -215,7 +214,7 @@ if __name__ == "__main__":
     doc text file
     word text file
     """
-    
+
     if(len(sys.argv)-1 != 4):  # -1 cause the name of the script (e.g. "index.py")... can usually ignore
         print("Wrong number of arguments!!!")
     else:
