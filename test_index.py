@@ -106,9 +106,51 @@ def test_one_page():
     g = index.Indexer("xml-files/one_page.xml", "txt-files/titles7.txt",
                       "txt-files/docs7.txt", "txt-files/words7.txt")
     assert g.id_title_dict == {1: 'first page'}
-    assert g.relevance_dict == {'page': {1: 0.0}, 'first': {1: 0.0}}
+    assert g.relevance_dict == {'page': {1: 0.0},
+                                'first': {1: 0.0}}  # should this be 0?
     assert g.links_dict == {1: set()}
-    assert g.current == {1: 7.59375e-05}
+    assert g.current == {1: 7.59375e-05}  # is this correct?
+
+
+def test_no_titles():
+    h = index.Indexer("xml-files/no_titles.xml", "txt-files/titles8.txt",
+                      "txt-files/docs8.txt", "txt-files/words8.txt")
+    assert h.id_title_dict == {1: '', 4: ''}
+    assert h.relevance_dict == {'page': {1: 0.0, 4: 0.0},
+                                'titl': {1: 0.0, 4: 0.0},
+                                'also': {4: 0.6931471805599453}}
+    assert h.links_dict == {1: set(), 4: set()}
+    assert h.current == {1: 0.49999999999999994, 4: 0.49999999999999994}
+
+
+def test_no_words_or_titles():
+    i = index.Indexer("xml-files/no_words_or_titles.xml", "txt-files/titles9.txt",
+                      "txt-files/docs9.txt", "txt-files/words9.txt")
+    assert i.id_title_dict == {1: '', 4: '', 5: ''}
+    assert i.relevance_dict == {}
+    assert i.links_dict == {1: set(), 4: set(), 5: set()}
+    assert i.current == {1: 0.3333333333333333,
+                         4: 0.3333333333333333, 5: 0.3333333333333333}
+
+
+def test_no_words():
+    j = index.Indexer("xml-files/no_words.xml", "txt-files/titles10.txt",
+                      "txt-files/docs10.txt", "txt-files/words10.txt")
+    assert j.id_title_dict == {1: 'title 1', 2: 'title 2'}
+    assert j.relevance_dict == {'titl': {1: 0.0, 2: 0.0},
+                                '1': {1: 0.6931471805599453},
+                                '2': {2: 0.6931471805599453}}
+    assert j.links_dict == {1: set(), 2: set()}
+    assert j.current == {1: 0.49999999999999994, 2: 0.49999999999999994}
+
+
+def test_one_word():
+    k = index.Indexer("xml-files/one_word.xml", "txt-files/titles11.txt",
+                      "txt-files/docs11.txt", "txt-files/words11.txt")
+    assert k.id_title_dict == {1: 'title'}
+    assert k.relevance_dict == {'titl': {1: 0.0}}
+    assert k.links_dict == {1: set()}
+    assert k.current == {1: 1}  # ask if this should be 1?? .0000759375
 
 
 # def test_index_invalid_args():

@@ -1,0 +1,22 @@
+<xml>
+  <page>
+    <title>
+    </title>
+    <id>
+      1
+    </id>
+    <text>
+    this page has no title
+    </text>
+  </page>
+    <page>
+    <title>
+    </title>
+    <id>
+      4
+    </id>
+    <text>
+    this page also has no title 
+    </text>
+  </page>
+</xml>
