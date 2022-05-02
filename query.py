@@ -10,6 +10,7 @@ from nltk.stem import PorterStemmer
 class Querier:
 
     def __init__(self, title_path: str, docs_path: str, words_path: str, pg_rank: bool):
+        
         self.title_path = title_path
         self.docs_path = docs_path
         self.words_path = words_path
@@ -77,6 +78,7 @@ class Querier:
         make_stems = PorterStemmer()
 
         self.query_corpus = set()
+        self.title_list = []
 
         all_text = re.findall(n_regex, query)
         for word in all_text:
@@ -92,7 +94,15 @@ class Querier:
 
 
 if __name__ == "__main__":
-    """
+    """Main method that handles the inputs for Query
+
+    Parameters:
+    title text file
+    doc text file
+    word text file
+
+    Throws:
+    Value Error if there are more than 5 or less than 4 arguments passed in
     """
     q = None
     if (len(sys.argv) == 5):
