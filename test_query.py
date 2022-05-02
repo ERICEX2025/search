@@ -1,7 +1,7 @@
 import pytest
 import query
 
-# make different txt files
+"""Tests query for basic tf/idf case - no page rank"""
 
 
 def test_query_tf_idf():
@@ -24,6 +24,9 @@ def test_query_tf_idf():
     assert a.title_list == ["Page 1", "Page 2"]
 
 
+"""Tests query when page rank is included"""
+
+
 def test_query_page_rank():
     c = query.Querier("txt-files/titles2.txt",
                       "txt-files/docs2.txt", "txt-files/words2.txt", True)
@@ -39,6 +42,9 @@ def test_query_page_rank():
     assert c.title_list == ["A"]
 
 
+"""Tests query when page rank is not included"""
+
+
 def test_query_page_rank2():
     d = query.Querier("txt-files/titles4.txt",
                       "txt-files/docs4.txt", "txt-files/words4.txt", False)
@@ -47,8 +53,10 @@ def test_query_page_rank2():
     assert d.title_list == ["A", "D"]
 
 
+"""Tests query when a query produces no results"""
+
+
 def test_query_page_rank3():
     e = query.Querier("txt-files/titles5.txt",
                       "txt-files/docs5.txt", "txt-files/words5.txt", True)
-    with pytest.raises(ValueError):
-        e.handle_query("no words")
+    assert e.handle_query("no words") == "no results were found!"

@@ -7,10 +7,11 @@ from nltk.stem import PorterStemmer
 
 # READ ME
 
+
 class Querier:
 
     def __init__(self, title_path: str, docs_path: str, words_path: str, pg_rank: bool):
-        
+
         self.title_path = title_path
         self.docs_path = docs_path
         self.words_path = words_path
@@ -66,7 +67,7 @@ class Querier:
             self.title_list.append(self.title_dict[id])
 
         if len(self.title_list) == 0:
-            raise ValueError("no results were found!")
+            print("no results were found!")
 
     def print_list(self):
         for x in range(0, len(self.title_list)):
