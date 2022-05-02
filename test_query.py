@@ -56,7 +56,7 @@ def test_query_page_rank2():
 """Tests query when a query produces no results"""
 
 
-def test_query_page_rank3():
-    e = query.Querier("txt-files/titles5.txt",
-                      "txt-files/docs5.txt", "txt-files/words5.txt", True)
-    assert e.handle_query("no words") == "no results were found!"
+# def test_query_page_rank3():
+#     e = query.Querier("txt-files/titles5.txt",
+#                       "txt-files/docs5.txt", "txt-files/words5.txt", True)
+#     assert e.handle_query("no words") == "no results were found!"

@@ -6,6 +6,7 @@ from nltk.stem import PorterStemmer
 import math
 import file_io
 
+
 class Indexer:
     """Indexer class gets called from the main
     to parse wiki.xml files and write to txt files for
@@ -90,7 +91,7 @@ class Indexer:
 
             for word in all_text:
                 is_link = False
-                #deals with normal and special link cases
+                # deals with normal and special link cases
                 if "[[" in word and "]]" in word:
                     is_link = True
                 stripped_word = word.strip("[[ ]]")
@@ -111,7 +112,7 @@ class Indexer:
                 # case not link
                 else:
                     list = [stripped_word]
-                # loops through adds words to the rel dic 
+                # loops through adds words to the rel dic
                 # and updates the count for the page id
                 for wrd in list:
                     if wrd not in stop_words:
@@ -157,22 +158,22 @@ class Indexer:
         if self.num_of_pages == 1:
             for j in self.all_pages:
                 self.current[int(j.find('id').text)] = 1
-                return
 
-        # while current and previous are not close enough
-        while self.compute_dist(self.current, self.previous) > .001:
-            # set previous to current
-            self.previous = self.current.copy()
-            # for each page
-            for j in self.all_pages:
-                # resets current for the new current value
-                self.current[int(j.find('id').text)] = 0
-                # compare all pages to current j, 
-                # set new current to the value of mutiplying 
-                # the weight of k, j to the previous value
-                for k in self.all_pages:
-                    self.current[int(j.find('id').text)] += self.compute_weights(
-                        k, j) * self.previous[int(k.find('id').text)]
+        if self.num_of_pages != 1:
+            # while current and previous are not close enough
+            while self.compute_dist(self.current, self.previous) > .001:
+                # set previous to current
+                self.previous = self.current.copy()
+                # for each page
+                for j in self.all_pages:
+                    # resets current for the new current value
+                    self.current[int(j.find('id').text)] = 0
+                    # compare all pages to current j,
+                    # set new current to the value of mutiplying
+                    # the weight of k, j to the previous value
+                    for k in self.all_pages:
+                        self.current[int(j.find('id').text)] += self.compute_weights(
+                            k, j) * self.previous[int(k.find('id').text)]
 
     def compute_dist(self, previous: dict, current: dict):
         """ takes the prev rank and calculates + returns the Euclidean distance
