@@ -7,6 +7,7 @@ from nltk.stem import PorterStemmer
 
 # READ ME
 
+
 class Querier:
     """Querier class gets called from the main
     to REPL and based on the user input, prints

@@ -1,18 +1,11 @@
 import pytest
 import index
 
-# why is this simple test not working ;(
-# I will camp at conceptual hours and get this working and
-
-
-# def test_exception():
-#     """ tests invalid input """
-#     invalid_Length = [0]
-#     with pytest.raises(ValueError):
-#         test = index.Indexer()  # not sure this will work...
-
-
 # have a case when relevance is the same?
+
+"""Tests tf and idf for a basic case"""
+
+
 def test_index_tf_idf():
     a = index.Indexer("xml-files/test_tf_idf.xml",
                       "txt-files/titles.txt", "txt-files/docs.txt", "txt-files/words.txt")
@@ -31,6 +24,9 @@ def test_index_tf_idf():
                          2: 0.3333333333333333, 3: 0.3333333333333333}
 
 
+"""Tests page rank with pipe links, multiple links, and no links"""
+
+
 def test_index_page_rank1():
     b = index.Indexer("xml-files/PageRankExample1.xml", "txt-files/titles2.txt",
                       "txt-files/docs2.txt", "txt-files/words2.txt")
@@ -42,6 +38,9 @@ def test_index_page_rank1():
     assert b.links_dict == {1: {2, 3}, 2: set(), 3: {1}}
     assert b.current == {1: 0.4326427188659158,
                          2: 0.23402394780075067, 3: 0.33333333333333326}
+
+
+"""Tests page rank with links to all different pages and with multiple links"""
 
 
 def test_index_page_rank2():
@@ -57,6 +56,9 @@ def test_index_page_rank2():
                          2: 0.03749999999999998,
                          3: 0.37396603749279056,
                          4: 0.3866905000050588}
+
+
+"""Tests page rank with pipe links and links to oneself"""
 
 
 def test_index_page_rank3():
@@ -75,6 +77,9 @@ def test_index_page_rank3():
                          4: 0.44757215137388523}
 
 
+"""Tests page rank with multiple links from one page to another"""
+
+
 def test_index_page_rank4():
     e = index.Indexer("xml-files/PageRankExample4.xml", "txt-files/titles6.txt",
                       "txt-files/docs6.txt", "txt-files/words6.txt")
@@ -86,6 +91,9 @@ def test_index_page_rank4():
     assert e.links_dict == {1: {3}, 2: {4}, 3: {4}, 4: {3}}
     assert e.current == {1: 0.0375, 2: 0.0375,
                          3: 0.46249999999999997, 4: 0.4624999999999999}
+
+
+"""Tests page rank with metpages - original xml file"""
 
 
 def test_metapage():
@@ -102,6 +110,9 @@ def test_metapage():
     assert f.current == {1: 0.49999999999999994, 2: 0.49999999999999994}
 
 
+"""Tests page rank and tf/idf with only one page in the xml file - original xml file"""
+
+
 def test_one_page():
     g = index.Indexer("xml-files/one_page.xml", "txt-files/titles7.txt",
                       "txt-files/docs7.txt", "txt-files/words7.txt")
@@ -110,6 +121,9 @@ def test_one_page():
                                 'first': {1: 0.0}}  # should this be 0?
     assert g.links_dict == {1: set()}
     assert g.current == {1: 7.59375e-05}  # is this correct?
+
+
+"""Tests Indexer functions when none of the pages have titles - original xml file"""
 
 
 def test_no_titles():
@@ -123,6 +137,9 @@ def test_no_titles():
     assert h.current == {1: 0.49999999999999994, 4: 0.49999999999999994}
 
 
+"""Tests Indexer functions when there is no titles or text in any pages - original xml file"""
+
+
 def test_no_words_or_titles():
     i = index.Indexer("xml-files/no_words_or_titles.xml", "txt-files/titles9.txt",
                       "txt-files/docs9.txt", "txt-files/words9.txt")
@@ -131,6 +148,9 @@ def test_no_words_or_titles():
     assert i.links_dict == {1: set(), 4: set(), 5: set()}
     assert i.current == {1: 0.3333333333333333,
                          4: 0.3333333333333333, 5: 0.3333333333333333}
+
+
+"""Tests Indexer functions when there is titles, but no text on any page - original xml file"""
 
 
 def test_no_words():
@@ -144,6 +164,9 @@ def test_no_words():
     assert j.current == {1: 0.49999999999999994, 2: 0.49999999999999994}
 
 
+"""Tests Indexer functions when there is only one word in the file - original xml file"""
+
+
 def test_one_word():
     k = index.Indexer("xml-files/one_word.xml", "txt-files/titles11.txt",
                       "txt-files/docs11.txt", "txt-files/words11.txt")
@@ -153,14 +176,33 @@ def test_one_word():
     # assert k.current == {1: 1}  # ask if this should be 1?? .0000759375
 
 
-def test_no_pages():
-    k = index.Indexer("xml-files/no_pages.xml", "txt-files/titles11.txt",
-                      "txt-files/docs11.txt", "txt-files/words11.txt")
-    assert k.id_title_dict == {}
-    assert k.relevance_dict == {}
-    assert k.links_dict == {}
-    assert k.current == {}
+"""Tests Indexer functions when there are no pages in the xml file - original xml file"""
 
+
+def test_no_pages():
+    l = index.Indexer("xml-files/no_pages.xml", "txt-files/titles12.txt",
+                      "txt-files/docs12.txt", "txt-files/words12.txt")
+    assert l.id_title_dict == {}
+    assert l.relevance_dict == {}
+    assert l.links_dict == {}
+    assert l.current == {}
+
+
+"""Tests page rank when a links to a page outside of the xml file - original xml file"""
+
+
+def test_link_out_corpus():
+    m = index.Indexer("xml-files/link_out_corpus.xml", "txt-files/titles13.txt",
+                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
+    assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
+                                'corpu': {5: 0.6931471805599453},
+                                'page': {5: 0.0, 4: 0.0},
+                                'number': {5: 0.0, 4: 0.0},
+                                'one': {5: 0.6931471805599453},
+                                'two': {4: 0.6931471805599453}}
+    assert m.links_dict == {5: set(), 4: set()}
+    assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
 # def test_index_invalid_args():
 #     assert index.Indexer("PageRankExample1.xml", "titles2.txt",
