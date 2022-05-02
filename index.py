@@ -8,7 +8,7 @@ import file_io
 
 class Indexer:
     """Indexer class gets called from the main
-    to parse wifi files and write to txt files for
+    to parse wiki.xml files and write to txt files for
     Query to use
     """
 
@@ -90,7 +90,7 @@ class Indexer:
 
             for word in all_text:
                 is_link = False
-
+                #deals with normal and special link cases
                 if "[[" in word and "]]" in word:
                     is_link = True
                 stripped_word = word.strip("[[ ]]")
@@ -111,7 +111,8 @@ class Indexer:
                 # case not link
                 else:
                     list = [stripped_word]
-
+                # loops through adds words to the rel dic 
+                # and updates the count for the page id
                 for wrd in list:
                     if wrd not in stop_words:
                         lower_stemmed_word = make_stems.stem(wrd.lower())
@@ -130,10 +131,9 @@ class Indexer:
                             else:  # if word exists but not the page
                                 # initialize with count 1
                                 self.relevance_dict[lower_stemmed_word][page_id] = 1
-
                             if self.relevance_dict[lower_stemmed_word][page_id] >= aj_max_count:
                                 aj_max_count = self.relevance_dict[lower_stemmed_word][page_id]
-            # populate with tf
+            # uses the counts and populates with tf value
             for wordd in set_of_words_in_this_page:
                 tf = self.relevance_dict[wordd][page_id]/aj_max_count
                 self.relevance_dict[wordd][page_id] = tf
@@ -142,7 +142,7 @@ class Indexer:
         """ Goes through the Rel dic and multiplies the
         tf with the idf value to get the true rel value
         """
-        # populate with idf
+        # uses the tf value and populates with idf
         for word in self.relevance_dict:
             num_of_page_for_word = len(self.relevance_dict[word])
             for doc in self.relevance_dict[word]:
@@ -153,10 +153,17 @@ class Indexer:
         """ Calculates the page rank based on how the pages
         are linked to each other (the links in the pages)
         """
+        # while current and previous are not close enough
         while self.compute_dist(self.current, self.previous) > .001:
+            # set previous to current
             self.previous = self.current.copy()
+            # for each page
             for j in self.all_pages:
+                # resets current for the new current value
                 self.current[int(j.find('id').text)] = 0
+                # compare all pages to current j, 
+                # set new current to the value of mutiplying 
+                # the weight of k, j to the previous value
                 for k in self.all_pages:
                     self.current[int(j.find('id').text)] += self.compute_weights(
                         k, j) * self.previous[int(k.find('id').text)]
