@@ -78,6 +78,7 @@ class Querier:
         make_stems = PorterStemmer()
 
         self.query_corpus = set()
+        self.title_list = []
 
         all_text = re.findall(n_regex, query)
         for word in all_text:

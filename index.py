@@ -160,7 +160,6 @@ class Indexer:
                 for k in self.all_pages:
                     self.current[int(j.find('id').text)] += self.compute_weights(
                         k, j) * self.previous[int(k.find('id').text)]
-                    print(self.current)
 
     def compute_dist(self, previous: dict, current: dict):
         """ takes the prev rank and calculates + returns the Euclidean distance
