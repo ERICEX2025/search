@@ -14,6 +14,7 @@ class Indexer:
 
     def __init__(self, xml: str, title: str, doc: str, word: str):
         """Constructor for Indexer
+        initializes variables
 
         Parameters:
         xml -- The wiki.xml to parse
