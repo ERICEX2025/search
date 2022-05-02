@@ -55,9 +55,9 @@ class Querier:
         for word in self.query_corpus:
             if word in self.words_dict:
                 for key in self.words_dict[word]:
-                    tot_sum[int(key.find('id').text)] = 0
-                    tot_sum[int(key.find('id').text)] += (self.words_dict[word]
-                                                          [int(key.find('id').text)] * self.docs_dict[int(key.find('id').text)])
+                    tot_sum[key] = 0
+                    tot_sum[key] += (self.words_dict[word]
+                                     [key] * self.docs_dict[key])
 
         sorted_dict = {k: v for k, v in sorted(
             tot_sum.items(), key=lambda item: item[1], reverse=True)}
