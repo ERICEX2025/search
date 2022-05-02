@@ -1,0 +1,24 @@
+<xml>
+  <page>
+    <title>
+      first page 
+    </title>
+    <id>
+      1
+    </id>
+    <text>
+      [[Category:Computer Science]]
+    </text>
+  </page>
+  <page>
+    <title>
+	  Category:Computer Science
+	</title>
+	<id>
+	  2
+	</id>
+	<text>
+      no link
+	</text>
+  </page>
+</xml>

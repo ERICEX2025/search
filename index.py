@@ -156,7 +156,7 @@ class Indexer:
         page2_id = int(page2.find('id').text)
         if page1_id == page2_id:
             return 0.15/self.num_of_pages
-        if len(self.links_dict[page1_id]) == 0:
+        elif len(self.links_dict[page1_id]) == 0:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/(self.num_of_pages - 1))
         elif page2_id in self.links_dict[page1_id]:
             return 0.15/self.num_of_pages + (1 - 0.15)*(1/len(self.links_dict[page1_id]))

@@ -3,6 +3,7 @@ Provides functionality for reading from/writing to the 3 index files used by
 indexer and querier in search
 """
 
+
 def write_title_file(title: str, dictionary: dict):
     """
     Writes the dictionary of documents to titles into a file to be read in querying
