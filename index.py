@@ -185,7 +185,6 @@ class Indexer:
             prev.append(previous[key])
         for key in current:
             curr.append(current[key])
-        print(math.dist(curr, prev))
         return math.dist(curr, prev)
 
     def compute_weights(self, page1: str, page2: str):

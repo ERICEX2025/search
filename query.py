@@ -30,7 +30,7 @@ class Querier:
         self.words_path = words_path
         self.pg_rank = pg_rank
 
-        #empty dics to get filled from reading the inputted files
+        # empty dics to get filled from reading the inputted files
         self.title_dict = {}
         self.docs_dict = {}
         self.words_dict = {}
@@ -59,12 +59,12 @@ class Querier:
         """
         tot_sum = {}  # from id to sum value
         # goes through each word of the query
-        for word in self.query_corpus: 
+        for word in self.query_corpus:
             # if the words appear in the wiki page
-            if word in self.words_dict: 
-                 # loop through the ids that contain the word 
-                 # add their corresponding rel value to dic
-                 # of ids to their sum rel value
+            if word in self.words_dict:
+                # loop through the ids that contain the word
+                # add their corresponding rel value to dic
+                # of ids to their sum rel value
                 for key in self.words_dict[word]:
                     tot_sum[key] = 0
                     tot_sum[key] += self.words_dict[word][key]
@@ -73,10 +73,10 @@ class Querier:
             tot_sum.items(), key=lambda item: item[1], reverse=True)}
 
         for id in list(sorted_dict.keys())[:10]:
-            self.title_list.append(self.title_dict[id])  
+            self.title_list.append(self.title_dict[id])
 
         if len(self.title_list) == 0:
-            print("no results were found!") 
+            print("no results were found!")
 
     def page_rank_score(self):
         """ sums up the relevance value for each page id
@@ -89,7 +89,7 @@ class Querier:
         for word in self.query_corpus:
             # if the words appear in the wiki page
             if word in self.words_dict:
-                # loop through the ids that contain the word 
+                # loop through the ids that contain the word
                 # add their corresponding rel value*pagerank
                 # value to dic of ids to their sum rel value
                 for key in self.words_dict[word]:
@@ -128,7 +128,7 @@ class Querier:
 
         # resets these lists for the next query
         self.query_corpus = set()
-        self.title_list = [] 
+        self.title_list = []
 
         # processes the query, removing stop words and stems
         all_text = re.findall(n_regex, query)
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         raise ValueError("invalid number of args")
 
     while True:
-        query = input("What would you like to search")
+        query = input("What would you like to search:")
         if query == ":quit":
             break
         q.handle_query(query)

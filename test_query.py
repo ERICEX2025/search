@@ -42,10 +42,10 @@ def test_query_page_rank():
     assert c.title_list == ["A"]
 
 
-"""Tests query when page rank is not included"""
+"""Tests query when page rank is not included and we are searching for a title"""
 
 
-def test_query_page_rank2():
+def test_query_title():
     d = query.Querier("txt-files/titles4.txt",
                       "txt-files/docs4.txt", "txt-files/words4.txt", False)
     d.handle_query("A")
@@ -53,10 +53,24 @@ def test_query_page_rank2():
     assert d.title_list == ["A", "D"]
 
 
+"""Tests query when page rank is not included and we are searching for text"""
+
+
+def test_query_text():
+    d = query.Querier("txt-files/small_titles.txt",
+                      "txt-files/small_docs.txt", "txt-files/small_words.txt", False)
+    d.handle_query("example")
+    assert d.query_corpus == {"example"}
+    assert d.title_list == ['Macro-historical',
+                            'Anatopism',
+                            'Comparative historical research',
+                            'Anachronism',
+                            'Sinecure',
+                            'Progressive war',
+                            'Memory hole',
+                            'Transformation of culture',
+                            'Popular history',
+                            'Loss exchange ratio']
+
+
 """Tests query when a query produces no results"""
-
-
-# def test_query_page_rank3():
-#     e = query.Querier("txt-files/titles5.txt",
-#                       "txt-files/docs5.txt", "txt-files/words5.txt", True)
-#     assert e.handle_query("no words") == "no results were found!"
