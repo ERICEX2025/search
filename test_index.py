@@ -3,7 +3,7 @@ import index
 
 # have a case when relevance is the same?
 
-"""Tests tf and idf for a basic case"""
+"""Tests tf and idf for a basic case, no links"""
 
 
 def test_index_tf_idf():
@@ -204,18 +204,34 @@ def test_link_out_corpus():
     assert m.links_dict == {5: set(), 4: set()}
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
+"""Tests handling Captialization (same page as above but with caps)"""
 
-"""Tests indexer functions when the titles of two pages are the same"""
+def test_capitalization():
+    m = index.Indexer("xml-files/Capitalization.xml", "txt-files/titles13.txt",
+                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
+    assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
+                                'corpu': {5: 0.6931471805599453},
+                                'page': {5: 0.0, 4: 0.0},
+                                'number': {5: 0.0, 4: 0.0},
+                                'one': {5: 0.6931471805599453},
+                                'two': {4: 0.6931471805599453}}
+    assert m.links_dict == {5: set(), 4: set()}
+    assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
+
+"""Tests handling Stemming (same page as above but with different words, same roots)"""
+
+def test_stemming():
+    m = index.Indexer("xml-files/Stemming.xml", "txt-files/titles13.txt",
+                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
+    assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
+                                'corpu': {5: 0.6931471805599453},
+                                'page': {5: 0.0, 4: 0.0},
+                                'number': {5: 0.0, 4: 0.0},
+                                'one': {5: 0.6931471805599453},
+                                'two': {4: 0.6931471805599453}}
+    assert m.links_dict == {5: set(), 4: set()}
+    assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
 
-def test_same_titles():
-    n = index.Indexer("xml-files/same_titles.xml", "txt-files/same_titles.txt",
-                      "txt-files/same_docs.txt", "txt-files/same_words.txt")
-    assert n.id_title_dict == {1: 'dogs', 2: 'cats', 3: 'dogs'}
-    assert n.relevance_dict == {'page': {1: 0.0, 2: 0.0, 3: 0.0},
-                                'dog': {1: 0.4054651081081644, 3: 0.4054651081081644},
-                                'cat': {2: 1.0986122886681098},
-                                'anoth': {3: 0.5493061443340549}}
-    assert n.links_dict == {1: set(), 2: set(), 3: set()}
-    assert n.current == {1: 0.3333333333333333,
-                         2: 0.3333333333333333, 3: 0.3333333333333333}

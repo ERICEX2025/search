@@ -1,0 +1,24 @@
+<xml>
+  <page>
+    <title>
+    page number one
+    </title>
+    <id>
+      5
+    </id>
+    <text>
+    THIS IS A [[LINK]] OUT OF THE CORPUS
+    </text>
+  </page>
+    <page>
+    <title>
+    page number two
+    </title>
+    <id>
+      4
+    </id>
+    <text>
+    THIS HAS NO LINK
+    </text>
+  </page>
+</xml>

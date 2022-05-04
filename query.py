@@ -138,10 +138,6 @@ class Querier:
             if word not in stop_words:
                 self.query_corpus.add(make_stems.stem(word.lower()))
 
-        # if self.pg_rank == True:
-        #     self.page_rank_score()
-        # elif self.pg_rank == False:
-        #     self.relevance_score()
         self.relevance_score()
 
         self.print_list()
