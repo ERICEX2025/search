@@ -115,9 +115,9 @@ class Indexer:
                 # loops through adds words to the rel dic
                 # and updates the count for the page id
                 for wrd in list:
-                    lower_wrd = wrd.lower()
-                    if lower_wrd not in stop_words:
-                        lower_stemmed_word = make_stems.stem(lower_wrd)
+                    lower_word = wrd.lower()
+                    if lower_word not in stop_words:
+                        lower_stemmed_word = make_stems.stem(lower_word)
                         set_of_words_in_this_page.add(lower_stemmed_word)
                         # if word does not exist in the rel dic
                         if lower_stemmed_word not in self.relevance_dict:
