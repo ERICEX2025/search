@@ -52,22 +52,17 @@ class Querier:
         file_io.read_words_file(self.words_path, self.words_dict)
 
     def relevance_score(self):
-        """ sums up the relevance value for each page id
-        and sort it based on the most relevant, then 
-        add the title of the id in that sorted order to
-        the top 10 titlelist
+        """ sums up the relevance value or relevance value 
+        with pagerank for each page id and sort it based on 
+        the most relevant, then add the title of the id in 
+        that sorted order to the top 10 titlelist
         """
         tot_sum = {}  # from id to sum value
         # goes through each word of the query
-        for word in self.query_corpus:
-            # if the words appear in the wiki page
-            if word in self.words_dict:
-                # loop through the ids that contain the word
-                # add their corresponding rel value to dic
-                # of ids to their sum rel value
-                for key in self.words_dict[word]:
-                    tot_sum[key] = 0
-                    tot_sum[key] += self.words_dict[word][key]
+        if self.pg_rank:
+            self.page_rank_score(tot_sum)
+        else:
+            self.no_page_rank_score(tot_sum)
 
         sorted_dict = {k: v for k, v in sorted(
             tot_sum.items(), key=lambda item: item[1], reverse=True)}
@@ -78,14 +73,13 @@ class Querier:
         if len(self.title_list) == 0:
             print("no results were found!")
 
-    def page_rank_score(self):
-        """ sums up the relevance value for each page id
-        and sort it based on the most relevant * page rank
-        , then add the title of the id in that sorted order to
-        the top 10 titlelist
+    def page_rank_score(self, tot_sum: dict):
+        """ Calculates the sum rel score for each 
+        page id
+
+        Parameters:
+        tot_sum -- takes in the tot_sum dictionary to add to
         """
-        tot_sum = {}  # from id to sum value
-        # goes through each word of the query
         for word in self.query_corpus:
             # if the words appear in the wiki page
             if word in self.words_dict:
@@ -95,16 +89,24 @@ class Querier:
                 for key in self.words_dict[word]:
                     tot_sum[key] = 0
                     tot_sum[key] += (self.words_dict[word]
-                                     [key] * self.docs_dict[key])
+                                    [key] * self.docs_dict[key])
 
-        sorted_dict = {k: v for k, v in sorted(
-            tot_sum.items(), key=lambda item: item[1], reverse=True)}
+    def no_page_rank_score(self, tot_sum: dict):
+        """ Calculates the sum rel score for each 
+        page id including pagerank
 
-        for id in list(sorted_dict.keys())[:10]:
-            self.title_list.append(self.title_dict[id])
-
-        if len(self.title_list) == 0:
-            print("no results were found!")
+        Parameters:
+        tot_sum -- takes in the tot_sum dictionary to add to
+        """
+        for word in self.query_corpus:
+                # if the words appear in the wiki page
+                if word in self.words_dict:
+                    # loop through the ids that contain the word
+                    # add their corresponding rel value to dic
+                    # of ids to their sum rel value
+                    for key in self.words_dict[word]:
+                        tot_sum[key] = 0
+                        tot_sum[key] += self.words_dict[word][key]
 
     def print_list(self):
         """ Prints up to the top 10 pages to the user
@@ -136,10 +138,11 @@ class Querier:
             if word not in stop_words:
                 self.query_corpus.add(make_stems.stem(word.lower()))
 
-        if self.pg_rank == True:
-            self.page_rank_score()
-        elif self.pg_rank == False:
-            self.relevance_score()
+        # if self.pg_rank == True:
+        #     self.page_rank_score()
+        # elif self.pg_rank == False:
+        #     self.relevance_score()
+        self.relevance_score
 
         self.print_list()
 
@@ -164,8 +167,10 @@ if __name__ == "__main__":
     q = None
     if (len(sys.argv) == 5):
         q = Querier(sys.argv[2], sys.argv[3], sys.argv[4], True)
+        print("pagerank")
     elif (len(sys.argv) == 4):
         q = Querier(sys.argv[1], sys.argv[2], sys.argv[3], False)
+        print("no pagerank")
     else:
         raise ValueError("invalid number of args")
 

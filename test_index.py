@@ -173,7 +173,7 @@ def test_one_word():
     assert k.id_title_dict == {1: 'title'}
     assert k.relevance_dict == {'titl': {1: 0.0}}
     assert k.links_dict == {1: set()}
-    assert k.current == {1: 1}  # ask if this should be 1?? .0000759375
+    assert k.current == {1: 1} 
 
 """Tests Indexer functions when there are no pages in the xml file - original xml file"""
 

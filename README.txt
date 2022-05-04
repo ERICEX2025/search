@@ -3,25 +3,25 @@ Group members: Our group members are Eric Long Him Ko and Mikayla Walsh.
 Bugs: There are no bugs in our code that we are aware of. 
 
 How a user interacts with the program: In order to interact with our program, a user must first run the indexer 
-on the desired xml file by typing $ python3 index.py [wiki file] titles.txt docs.txt words.txt into thier terminal. 
+on the desired xml file by typing $ python3 index.py [wiki file] titles.txt docs.txt words.txt into their terminal. 
 Next, the user will run the querier on the files by typing $ python3 query.py titles.txt docs.txt words.txt into 
-their terminal. After this, they will be prompted to type in a query they wish to search. By hitting enter, they 
-will be given a list of the top 10 (or less if there is not 10) documents that match that query. This process will 
-continue until the user types :quit. 
+their terminal or $ python3 query.py --pagerank titles.txt docs.txt words.txt for pagerank. After this, they will 
+be prompted to type in a query they wish to search. By hitting enter, they will be given a list of the top 10 (or
+less if there is not 10) documents that match that query. This process will continue until the user types :quit. 
 
 How the pieces of your program fit together: When the indexer is ran on an xml file and the corresponding txt files, 
-the first txt file is the titles file. This file gets populated with a dictionary from page ids to titles for the xml 
-file. The second txt file is the words file which is populated with a double dictionary from words to ids to relevance 
-for the xml file. The last txt file is the docs file which is populated with a dictionary from ids to page rank for the 
-xml file. These files are what is passed into the querier, along with a boolean value which tells the querier whether or 
-not to use page rank. If the boolean value is False, the querier runs using a relevance function which uses the values in 
-the double dictionary from the words file. Once the top 10 ids are found for a given query, the dictionary from the titles
-file is used to find the corresponding titles and that is returned. Similarly, if the boolean value is True the querier runs 
-using a function which multiplies the values in the double dictionary from the words file and the page rank dictionary from 
-the docs file. Once the top 10 ids are found for a given query, the dictionary from the titles file is used to find the 
-corresponding titles and that is returned.
+the first txt file is the titles file. This file gets populated with a dictionary from page ids to titles based on the 
+xml file. The second txt file is the words file which is populated with a double dictionary from words to ids to relevance 
+based on the xml file. The last txt file is the docs file which is populated with a dictionary from ids to page rank based 
+on the xml file. These files are what is passed into the querier, along with a boolean value which tells the querier whether 
+or not to use page rank. If the boolean value is False, the querier runs using a no_page_rank_score function which uses the 
+values in the double dictionary from the words file. Once the top 10 ids are found for a given query, the dictionary from the 
+titles file is used to find the corresponding titles and that is returned. Similarly, if the boolean value is True the querier 
+runs using a page_rank_score function which multiplies the values in the double dictionary from the words file and the page 
+rank dictionary from the docs file. Once the top 10 ids are found for a given query, the dictionary from the titles file is 
+used to find the corresponding titles and that is returned.
 
-Features you failed to implement, as well as any extra features you implemented: We haven't failed to implemtn anything nor 
+Features you failed to implement, as well as any extra features you implemented: We haven't failed to implement anything nor 
 did we implement any extra features. 
 
 How you tested your program, and ALL of your system tests: We tested our program as we went by using the Interactive Window

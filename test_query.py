@@ -74,3 +74,6 @@ def test_query_text():
 
 
 """Tests query when a query produces no results"""
+
+# and when page rank is included we are searching for text
+# and when page rank is included we are searching for title
