@@ -3,7 +3,7 @@ import index
 
 # have a case when relevance is the same?
 
-"""Tests tf and idf for a basic case"""
+"""Tests tf and idf for a basic case, no links"""
 
 
 def test_index_tf_idf():
@@ -203,7 +203,34 @@ def test_link_out_corpus():
     assert m.links_dict == {5: set(), 4: set()}
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
-# def test_index_invalid_args():
-#     assert index.Indexer("PageRankExample1.xml", "titles2.txt",
-#                          "docs2.txt") is "Wrong number of arguments!!!"
-    # how to call this??
+"""Tests handling Captialization (same page as above but with caps)"""
+
+def test_capitalization():
+    m = index.Indexer("xml-files/Capitalization.xml", "txt-files/titles13.txt",
+                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
+    assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
+                                'corpu': {5: 0.6931471805599453},
+                                'page': {5: 0.0, 4: 0.0},
+                                'number': {5: 0.0, 4: 0.0},
+                                'one': {5: 0.6931471805599453},
+                                'two': {4: 0.6931471805599453}}
+    assert m.links_dict == {5: set(), 4: set()}
+    assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
+
+"""Tests handling Stemming (same page as above but with different words, same roots)"""
+
+def test_stemming():
+    m = index.Indexer("xml-files/Stemming.xml", "txt-files/titles13.txt",
+                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
+    assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
+                                'corpu': {5: 0.6931471805599453},
+                                'page': {5: 0.0, 4: 0.0},
+                                'number': {5: 0.0, 4: 0.0},
+                                'one': {5: 0.6931471805599453},
+                                'two': {4: 0.6931471805599453}}
+    assert m.links_dict == {5: set(), 4: set()}
+    assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
+
+
