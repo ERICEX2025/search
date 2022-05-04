@@ -96,7 +96,7 @@ def test_index_page_rank4():
 """Tests page rank with metpages - original xml file"""
 
 
-def test_metapage():
+def test_metalink():
     f = index.Indexer("xml-files/test_metapage.xml", "txt-files/titles3.txt",
                       "txt-files/docs3.txt", "txt-files/words3.txt")
     assert f.id_title_dict == {1: 'first page', 2: 'Category:Computer Science'}
@@ -118,9 +118,9 @@ def test_one_page():
                       "txt-files/docs7.txt", "txt-files/words7.txt")
     assert g.id_title_dict == {1: 'first page'}
     assert g.relevance_dict == {'page': {1: 0.0},
-                                'first': {1: 0.0}}  # should this be 0?
+                                'first': {1: 0.0}}
     assert g.links_dict == {1: set()}
-    assert g.current == {1: 1}  
+    assert g.current == {1: 1}
 
 
 """Tests Indexer functions when none of the pages have titles - original xml file"""
@@ -173,7 +173,8 @@ def test_one_word():
     assert k.id_title_dict == {1: 'title'}
     assert k.relevance_dict == {'titl': {1: 0.0}}
     assert k.links_dict == {1: set()}
-    assert k.current == {1: 1} 
+    assert k.current == {1: 1}
+
 
 """Tests Indexer functions when there are no pages in the xml file - original xml file"""
 
