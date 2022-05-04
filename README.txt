@@ -30,10 +30,10 @@ not test in these files include system tests as well as testing when our query d
 system tests with small files to make sure our query was working as expected by prompting the user for a query and then 
 returning a list of titles labeled 1 to 10 (or less if there was not 10) and then again prompting the user for a query until 
 the user typed in :quit. We used our unit tests to make sure these were in fact the top 10 most relevant titles. We also used 
-the system tests to assure that when the incorrect number of inputs was provided for index (anything except 4) that a print 
-statement told the user so. In addition, we made sure that for query if there are 4 inputs we are not using page rank, if there
-are 5 inputs we are using page rank, and if there is any other number the user is informed that it is an invalid input. Another 
-case we tested with system tests were when no titles were returned. When this is the case for a provided query, our program 
+the system tests to assure that when the incorrect number of inputs was provided for index (anything except 4) that a ValueErroris
+raised. In addition, we made sure that for query if there are 4 inputs we are not using page rank, if there
+are 5 inputs we are using page rank, and if there is any other number the user is informed that it is an invalid input via a ValueError.
+Another case we tested with system tests were when no titles were returned. When this is the case for a provided query, our program 
 prints out "no results were found!" and allows the user to type in a new query. We did not throw an error here so that the 
 user could type in a new query. If we threw an error, the program would terminate. In addition, we used system tests to assess
 our runtime by writing time before our command inputs. Finally, we used the MedWiki results posted on Ed to compare them to our 
@@ -131,3 +131,32 @@ results:
 8:Paolo Uccello
 9:Norway
 10:Normandy
+
+(test when the query does not appear in any pages)
+python3 index.py xml-files/test_tf_idf.xml txt-files/titles.txt txt-files/docs.txt txt-files/words.txt
+python3 query.py txt-files/titles.txt txt-files/docs.txt txt-files/words.txt
+query: water
+return:
+no results were found!
+
+(test when index does not get the correct number of args)
+python3 index.py xml-files/test_tf_idf.xml txt-files/titles.txt txt-files/docs.txt
+return:
+Traceback (most recent call last):
+  File "/Users/mikaylawalsh/Desktop/cs200/projects/search-ERICEX2025-mikaylawalsh/index.py", line 239, in <module>
+    raise ValueError("Wrong number of arguments!!!")
+ValueError: Wrong number of arguments!!!
+
+(test when index does not get the correct number of args)
+python3 index.py xml-files/test_tf_idf.xml txt-files/titles.txt txt-files/docs.txt txt-files/words.txt
+python3 query.py txt-files/titles.txt txt-files/docs.txt
+return:
+Traceback (most recent call last):
+  File "/Users/mikaylawalsh/Desktop/cs200/projects/search-ERICEX2025-mikaylawalsh/query.py", line 173, in <module>
+    raise ValueError("invalid number of args")
+ValueError: invalid number of args
+
+(test to assess runtime)
+time python3 index.py BigWiki.xml big_titles.txt big_docs.txt big_words.txt
+return:
+python3 index.py BigWiki.xml big_titles.txt big_docs.txt big_words.txt  299.12s user 1.47s system 100% cpu 4:59.15 total

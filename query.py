@@ -89,7 +89,7 @@ class Querier:
                 for key in self.words_dict[word]:
                     tot_sum[key] = 0
                     tot_sum[key] += (self.words_dict[word]
-                                    [key] * self.docs_dict[key])
+                                     [key] * self.docs_dict[key])
 
     def no_page_rank_score(self, tot_sum: dict):
         """ Calculates the sum rel score for each 
@@ -99,14 +99,14 @@ class Querier:
         tot_sum -- takes in the tot_sum dictionary to add to
         """
         for word in self.query_corpus:
-                # if the words appear in the wiki page
-                if word in self.words_dict:
-                    # loop through the ids that contain the word
-                    # add their corresponding rel value to dic
-                    # of ids to their sum rel value
-                    for key in self.words_dict[word]:
-                        tot_sum[key] = 0
-                        tot_sum[key] += self.words_dict[word][key]
+            # if the words appear in the wiki page
+            if word in self.words_dict:
+                # loop through the ids that contain the word
+                # add their corresponding rel value to dic
+                # of ids to their sum rel value
+                for key in self.words_dict[word]:
+                    tot_sum[key] = 0
+                    tot_sum[key] += self.words_dict[word][key]
 
     def print_list(self):
         """ Prints up to the top 10 pages to the user
@@ -142,7 +142,7 @@ class Querier:
         #     self.page_rank_score()
         # elif self.pg_rank == False:
         #     self.relevance_score()
-        self.relevance_score
+        self.relevance_score()
 
         self.print_list()
 
@@ -167,10 +167,8 @@ if __name__ == "__main__":
     q = None
     if (len(sys.argv) == 5):
         q = Querier(sys.argv[2], sys.argv[3], sys.argv[4], True)
-        print("pagerank")
     elif (len(sys.argv) == 4):
         q = Querier(sys.argv[1], sys.argv[2], sys.argv[3], False)
-        print("no pagerank")
     else:
         raise ValueError("invalid number of args")
 

@@ -116,7 +116,7 @@ class Indexer:
                 # and updates the count for the page id
                 for wrd in list:
                     if wrd not in stop_words:
-                        lower_stemmed_word = make_stems.stem(wrd.lower())
+                        lower_stemmed_word = make_stems.stem(wrd)
                         set_of_words_in_this_page.add(lower_stemmed_word)
                         # if word does not exist in the rel dic
                         if lower_stemmed_word not in self.relevance_dict:
@@ -159,7 +159,7 @@ class Indexer:
             for j in self.all_pages:
                 self.current[int(j.find('id').text)] = 1
 
-        if self.num_of_pages != 1:
+        else:
             # while current and previous are not close enough
             while self.compute_dist(self.current, self.previous) > .001:
                 # set previous to current
@@ -177,6 +177,13 @@ class Indexer:
 
     def compute_dist(self, previous: dict, current: dict):
         """ takes the prev rank and calculates + returns the Euclidean distance
+
+        Parameters:
+        previous -- dictionary from ids to pagerank values of the prev iteration
+        current -- dictionary from ids to pagerank values of the current updated iteration
+
+        Returns:
+        returns the Euclidean distance given by the current and prev values
         """
         # moves the keys from the dics to arrays for math.dist
         prev = []
@@ -229,6 +236,6 @@ if __name__ == "__main__":
     """
 
     if(len(sys.argv)-1 != 4):  # -1 cause the name of the script (e.g. "index.py")... can usually ignore
-        print("Wrong number of arguments!!!")
+        raise ValueError("Wrong number of arguments!!!")
     else:
         Indexer(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

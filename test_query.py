@@ -73,7 +73,32 @@ def test_query_text():
                             'Loss exchange ratio']
 
 
-"""Tests query when a query produces no results"""
+"""Tests query when page rank is included and we are searching for a title"""
 
-# and when page rank is included we are searching for text
-# and when page rank is included we are searching for title
+
+def test_query_title():
+    d = query.Querier("txt-files/titles4.txt",
+                      "txt-files/docs4.txt", "txt-files/words4.txt", True)
+    d.handle_query("A")
+    assert d.query_corpus == {"a"}
+    assert d.title_list == ["D", "A"]
+
+
+"""Tests query when page rank is included and we are searching for text"""
+
+
+def test_query_text():
+    d = query.Querier("txt-files/small_titles.txt",
+                      "txt-files/small_docs.txt", "txt-files/small_words.txt", True)
+    d.handle_query("example")
+    assert d.query_corpus == {"exampl"}
+    assert d.title_list == ['Carthage',
+                            'Memory hole',
+                            'Anatopism',
+                            'Loss exchange ratio',
+                            'Anachronism',
+                            'Tertullian',
+                            'Rome',
+                            'Macro-historical',
+                            'Chronology',
+                            'Comparative historical research']

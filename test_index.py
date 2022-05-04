@@ -96,7 +96,7 @@ def test_index_page_rank4():
 """Tests page rank with metpages - original xml file"""
 
 
-def test_metapage():
+def test_metalink():
     f = index.Indexer("xml-files/test_metapage.xml", "txt-files/titles3.txt",
                       "txt-files/docs3.txt", "txt-files/words3.txt")
     assert f.id_title_dict == {1: 'first page', 2: 'Category:Computer Science'}
@@ -118,9 +118,9 @@ def test_one_page():
                       "txt-files/docs7.txt", "txt-files/words7.txt")
     assert g.id_title_dict == {1: 'first page'}
     assert g.relevance_dict == {'page': {1: 0.0},
-                                'first': {1: 0.0}}  # should this be 0?
+                                'first': {1: 0.0}}
     assert g.links_dict == {1: set()}
-    assert g.current == {1: 1}  
+    assert g.current == {1: 1}
 
 
 """Tests Indexer functions when none of the pages have titles - original xml file"""
@@ -173,7 +173,8 @@ def test_one_word():
     assert k.id_title_dict == {1: 'title'}
     assert k.relevance_dict == {'titl': {1: 0.0}}
     assert k.links_dict == {1: set()}
-    assert k.current == {1: 1} 
+    assert k.current == {1: 1}
+
 
 """Tests Indexer functions when there are no pages in the xml file - original xml file"""
 
@@ -203,7 +204,18 @@ def test_link_out_corpus():
     assert m.links_dict == {5: set(), 4: set()}
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
-# def test_index_invalid_args():
-#     assert index.Indexer("PageRankExample1.xml", "titles2.txt",
-#                          "docs2.txt") is "Wrong number of arguments!!!"
-    # how to call this??
+
+"""Tests indexer functions when the titles of two pages are the same"""
+
+
+def test_same_titles():
+    n = index.Indexer("xml-files/same_titles.xml", "txt-files/same_titles.txt",
+                      "txt-files/same_docs.txt", "txt-files/same_words.txt")
+    assert n.id_title_dict == {1: 'dogs', 2: 'cats', 3: 'dogs'}
+    assert n.relevance_dict == {'page': {1: 0.0, 2: 0.0, 3: 0.0},
+                                'dog': {1: 0.4054651081081644, 3: 0.4054651081081644},
+                                'cat': {2: 1.0986122886681098},
+                                'anoth': {3: 0.5493061443340549}}
+    assert n.links_dict == {1: set(), 2: set(), 3: set()}
+    assert n.current == {1: 0.3333333333333333,
+                         2: 0.3333333333333333, 3: 0.3333333333333333}
