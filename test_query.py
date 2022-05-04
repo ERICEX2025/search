@@ -30,16 +30,15 @@ def test_query_tf_idf():
 def test_query_page_rank():
     c = query.Querier("txt-files/titles2.txt",
                       "txt-files/docs2.txt", "txt-files/words2.txt", True)
-    c.handle_query("A")
+    c.handle_query("B")
     assert c.title_dict == {1: "A", 2: "B", 3: "C"}
     assert c.docs_dict == {1: 0.4326427188659158,
                            2: 0.23402394780075067, 3: 0.33333333333333326}
-    assert c.words_dict == {"a": {1: 1.0986122886681098},
-                            "b": {1: 0.4054651081081644, 2: 0.4054651081081644},
+    assert c.words_dict == {"b": {1: 0.4054651081081644, 2: 0.4054651081081644},
                             "c": {1: 0.4054651081081644, 3: 0.4054651081081644},
                             "f": {3: 1.0986122886681098}}
-    assert c.query_corpus == {"a"}
-    assert c.title_list == ["A"]
+    assert c.query_corpus == {"b"}
+    assert c.title_list == ["A", "B"]
 
 
 """Tests query when page rank is not included and we are searching for a title"""
@@ -48,9 +47,9 @@ def test_query_page_rank():
 def test_query_title():
     d = query.Querier("txt-files/titles4.txt",
                       "txt-files/docs4.txt", "txt-files/words4.txt", False)
-    d.handle_query("A")
-    assert d.query_corpus == {"a"}
-    assert d.title_list == ["A", "D"]
+    d.handle_query("B")
+    assert d.query_corpus == {"b"}
+    assert d.title_list == ["B"]
 
 
 """Tests query when page rank is not included and we are searching for text"""
@@ -60,7 +59,7 @@ def test_query_text():
     d = query.Querier("txt-files/small_titles.txt",
                       "txt-files/small_docs.txt", "txt-files/small_words.txt", False)
     d.handle_query("example")
-    assert d.query_corpus == {"example"}
+    assert d.query_corpus == {"exampl"}
     assert d.title_list == ['Macro-historical',
                             'Anatopism',
                             'Comparative historical research',
@@ -76,18 +75,18 @@ def test_query_text():
 """Tests query when page rank is included and we are searching for a title"""
 
 
-def test_query_title():
+def test_query_title2():
     d = query.Querier("txt-files/titles4.txt",
                       "txt-files/docs4.txt", "txt-files/words4.txt", True)
-    d.handle_query("A")
-    assert d.query_corpus == {"a"}
-    assert d.title_list == ["D", "A"]
+    d.handle_query("C")
+    assert d.query_corpus == {"c"}
+    assert d.title_list == ["D", "C", "A"]
 
 
 """Tests query when page rank is included and we are searching for text"""
 
 
-def test_query_text():
+def test_query_text2():
     d = query.Querier("txt-files/small_titles.txt",
                       "txt-files/small_docs.txt", "txt-files/small_words.txt", True)
     d.handle_query("example")

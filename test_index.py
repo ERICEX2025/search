@@ -27,14 +27,24 @@ def test_index_tf_idf():
 """Tests page rank with pipe links, multiple links, and no links"""
 
 
+# def test_index_page_rank1():
+#     b = index.Indexer("xml-files/PageRankExample1.xml", "txt-files/titles2.txt",
+#                       "txt-files/docs2.txt", "txt-files/words2.txt")
+#     assert b.id_title_dict == {1: "A", 2: "B", 3: "C"}
+#     assert b.relevance_dict == {"b": {1: 0.4054651081081644, 2: 0.4054651081081644},
+#                                 "c": {1: 0.4054651081081644, 3: 0.4054651081081644},
+#                                 "a": {1: 1.0986122886681098},
+#                                 "f": {3: 1.0986122886681098}}
+#     assert b.links_dict == {1: {2, 3}, 2: set(), 3: {1}}
+#     assert b.current == {1: 0.4326427188659158,
+#                          2: 0.23402394780075067, 3: 0.33333333333333326}
 def test_index_page_rank1():
     b = index.Indexer("xml-files/PageRankExample1.xml", "txt-files/titles2.txt",
                       "txt-files/docs2.txt", "txt-files/words2.txt")
     assert b.id_title_dict == {1: "A", 2: "B", 3: "C"}
-    assert b.relevance_dict == {"b": {1: 0.4054651081081644, 2: 0.4054651081081644},
-                                "c": {1: 0.4054651081081644, 3: 0.4054651081081644},
-                                "a": {1: 1.0986122886681098},
-                                "f": {3: 1.0986122886681098}}
+    assert b.relevance_dict == {'b': {1: 0.4054651081081644, 2: 0.4054651081081644},
+                                'c': {1: 0.4054651081081644, 3: 0.4054651081081644},
+                                'f': {3: 1.0986122886681098}}
     assert b.links_dict == {1: {2, 3}, 2: set(), 3: {1}}
     assert b.current == {1: 0.4326427188659158,
                          2: 0.23402394780075067, 3: 0.33333333333333326}
@@ -43,13 +53,24 @@ def test_index_page_rank1():
 """Tests page rank with links to all different pages and with multiple links"""
 
 
+# def test_index_page_rank2():
+#     c = index.Indexer("xml-files/PageRankExample2.xml", "txt-files/titles4.txt",
+#                       "txt-files/docs4.txt", "txt-files/words4.txt")
+#     assert c.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
+#     assert c.relevance_dict == {'c': {1: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
+#                                 'a': {1: 0.6931471805599453, 4: 0.6931471805599453},
+#                                 'd': {2: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
+#                                 'b': {2: 1.3862943611198906}}
+#     assert c.links_dict == {1: {3}, 2: {4}, 3: {4}, 4: {1, 3}}
+#     assert c.current == {1: 0.20184346250214996,
+#                          2: 0.03749999999999998,
+#                          3: 0.37396603749279056,
+#                          4: 0.3866905000050588}
 def test_index_page_rank2():
     c = index.Indexer("xml-files/PageRankExample2.xml", "txt-files/titles4.txt",
                       "txt-files/docs4.txt", "txt-files/words4.txt")
     assert c.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
     assert c.relevance_dict == {'c': {1: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
-                                'a': {1: 0.6931471805599453, 4: 0.6931471805599453},
-                                'd': {2: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
                                 'b': {2: 1.3862943611198906}}
     assert c.links_dict == {1: {3}, 2: {4}, 3: {4}, 4: {1, 3}}
     assert c.current == {1: 0.20184346250214996,
@@ -61,14 +82,26 @@ def test_index_page_rank2():
 """Tests page rank with pipe links and links to oneself"""
 
 
+# def test_index_page_rank3():
+#     d = index.Indexer("xml-files/PageRankExample3.xml", "txt-files/titles5.txt",
+#                       "txt-files/docs5.txt", "txt-files/words5.txt")
+#     assert d.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
+#     assert d.relevance_dict == {'f': {1: 1.3862943611198906},
+#                                 'a': {1: 1.3862943611198906},
+#                                 'b': {2: 1.3862943611198906},
+#                                 'd': {3: 0.6931471805599453, 4: 0.6931471805599453},
+#                                 'c': {3: 0.6931471805599453, 4: 0.6931471805599453}}
+#     assert d.links_dict == {1: set(), 2: set(), 3: {4}, 4: {3}}
+#     assert d.current == {1: 0.05242784862611451,
+#                          2: 0.05242784862611451,
+#                          3: 0.4475721513738852,
+#                          4: 0.44757215137388523}
 def test_index_page_rank3():
     d = index.Indexer("xml-files/PageRankExample3.xml", "txt-files/titles5.txt",
                       "txt-files/docs5.txt", "txt-files/words5.txt")
     assert d.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
     assert d.relevance_dict == {'f': {1: 1.3862943611198906},
-                                'a': {1: 1.3862943611198906},
                                 'b': {2: 1.3862943611198906},
-                                'd': {3: 0.6931471805599453, 4: 0.6931471805599453},
                                 'c': {3: 0.6931471805599453, 4: 0.6931471805599453}}
     assert d.links_dict == {1: set(), 2: set(), 3: {4}, 4: {3}}
     assert d.current == {1: 0.05242784862611451,
@@ -80,13 +113,22 @@ def test_index_page_rank3():
 """Tests page rank with multiple links from one page to another"""
 
 
+# def test_index_page_rank4():
+#     e = index.Indexer("xml-files/PageRankExample4.xml", "txt-files/titles6.txt",
+#                       "txt-files/docs6.txt", "txt-files/words6.txt")
+#     assert e.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
+#     assert e.relevance_dict == {'c': {1: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
+#                                 'a': {1: 0.46209812037329684},
+#                                 'd': {2: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.14384103622589042},
+#                                 'b': {2: 1.3862943611198906}}
+#     assert e.links_dict == {1: {3}, 2: {4}, 3: {4}, 4: {3}}
+#     assert e.current == {1: 0.0375, 2: 0.0375,
+#                          3: 0.46249999999999997, 4: 0.4624999999999999}
 def test_index_page_rank4():
     e = index.Indexer("xml-files/PageRankExample4.xml", "txt-files/titles6.txt",
                       "txt-files/docs6.txt", "txt-files/words6.txt")
     assert e.id_title_dict == {1: 'A', 2: 'B', 3: 'C', 4: 'D'}
     assert e.relevance_dict == {'c': {1: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.28768207245178085},
-                                'a': {1: 0.46209812037329684},
-                                'd': {2: 0.28768207245178085, 3: 0.28768207245178085, 4: 0.14384103622589042},
                                 'b': {2: 1.3862943611198906}}
     assert e.links_dict == {1: {3}, 2: {4}, 3: {4}, 4: {3}}
     assert e.current == {1: 0.0375, 2: 0.0375,
@@ -204,11 +246,13 @@ def test_link_out_corpus():
     assert m.links_dict == {5: set(), 4: set()}
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
+
 """Tests handling Captialization (same page as above but with caps)"""
 
+
 def test_capitalization():
-    m = index.Indexer("xml-files/Capitalization.xml", "txt-files/titles13.txt",
-                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    m = index.Indexer("xml-files/Capitalization.xml", "txt-files/titles15.txt",
+                      "txt-files/docs15.txt", "txt-files/words15.txt")
     assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
     assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
                                 'corpu': {5: 0.6931471805599453},
@@ -218,12 +262,14 @@ def test_capitalization():
                                 'two': {4: 0.6931471805599453}}
     assert m.links_dict == {5: set(), 4: set()}
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
+
 
 """Tests handling Stemming (same page as above but with different words, same roots)"""
 
+
 def test_stemming():
-    m = index.Indexer("xml-files/Stemming.xml", "txt-files/titles13.txt",
-                      "txt-files/docs13.txt", "txt-files/words13.txt")
+    m = index.Indexer("xml-files/Stemming.xml", "txt-files/titles14.txt",
+                      "txt-files/docs14.txt", "txt-files/words14.txt")
     assert m.id_title_dict == {5: 'page number one', 4: 'page number two'}
     assert m.relevance_dict == {'link': {5: 0.0, 4: 0.0},
                                 'corpu': {5: 0.6931471805599453},
@@ -235,3 +281,14 @@ def test_stemming():
     assert m.current == {5: 0.49999999999999994, 4: 0.49999999999999994}
 
 
+def test_same_titles():
+    n = index.Indexer("xml-files/same_titles.xml", "txt-files/same_titles.txt",
+                      "txt-files/same_docs.txt", "txt-files/same_words.txt")
+    assert n.id_title_dict == {1: 'dogs', 2: 'cats', 3: 'dogs'}
+    assert n.relevance_dict == {'page': {1: 0.0, 2: 0.0, 3: 0.0},
+                                'dog': {1: 0.4054651081081644, 3: 0.4054651081081644},
+                                'cat': {2: 1.0986122886681098},
+                                'anoth': {3: 0.5493061443340549}}
+    assert n.links_dict == {1: set(), 2: set(), 3: set()}
+    assert n.current == {1: 0.3333333333333333,
+                         2: 0.3333333333333333, 3: 0.3333333333333333}
